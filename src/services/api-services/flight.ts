@@ -5,26 +5,25 @@ import type {
   ApiResponse,
 } from '../../types/api';
 
-
 export const flightsApi = {
+async getFlights(
+  dep?: string,
+  arr?: string,
+  date?: string,
+): Promise<Flight[]> {
 
-  async getFlights(
-    page: number = 1,
-    limit: number = 10,
-  ): Promise<Flight[]> {
-    const response = await api.get<ApiResponse<Flight[]>>(
-      '/flights',
-      {
-        params: {
-          page,
-          limit,
-        },
-      },
-    );
+  const response = await api.get<
+    ApiResponse<Flight[]>
+  >('/flights', {
+    params: {
+      dep: dep || undefined,
+      arr: arr || undefined,
+      date: date || undefined,
+    },
+  });
 
-    return response.data.data ?? [];
-  },
-
+  return response.data.data ?? [];
+},
 
   async getFlightById(
     id: string,

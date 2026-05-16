@@ -5,13 +5,15 @@
 
 export { dashboardApi } from './dashboard';
 export { usersApi } from './users';
-export { productsApi } from './flight';
-export { ordersApi } from './orders';
+export { flightsApi } from './flight';
+export { flightSchedulesApi } from './flightSchedule';
 export { paymentsApi } from './payments';
-export { paymentMethodsApi } from './paymentMethods';
-export { transactionsApi } from './transactions';
-export { shippingApi } from './shipping';
+export { aircraftsApi } from './aircraft';
+export { airportsApi } from './airport';
+export { baggageApi } from './baggage';
 export { rolesApi } from './roles';
 export { authApi } from './auth';
-export { categoriesApi } from './categories';
+export { bookingsApi } from './booking';
+export { boardingPassApi } from './boardingPass';
+export { checkinsApi } from './checkIn';
 

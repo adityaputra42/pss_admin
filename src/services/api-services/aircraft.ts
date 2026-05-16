@@ -9,7 +9,7 @@ export const aircraftsApi = {
   async getAircrafts(): Promise<Aircraft[]> {
 
     const response = await api.get<ApiResponse<Aircraft[]>>(
-      '/aircrafts',
+      '/aircraft',
     );
 
     return response.data.data ?? [];
@@ -20,7 +20,7 @@ export const aircraftsApi = {
   ): Promise<Aircraft | null> {
 
     const response = await api.get<ApiResponse<Aircraft>>(
-      `/aircrafts/${id}`,
+      `/aircraft/${id}`,
     );
 
     return response.data.data;
@@ -31,7 +31,7 @@ export const aircraftsApi = {
   ): Promise<Aircraft | null> {
 
     const response = await api.post<ApiResponse<Aircraft>>(
-      '/aircrafts',
+      '/aircraft',
       payload,
     );
 
@@ -44,7 +44,7 @@ export const aircraftsApi = {
   ): Promise<Aircraft | null> {
 
     const response = await api.put<ApiResponse<Aircraft>>(
-      `/aircrafts/${id}`,
+      `/aircraft/${id}`,
       payload,
     );
 
@@ -55,6 +55,6 @@ export const aircraftsApi = {
     id: string,
   ): Promise<void> {
 
-    await api.delete(`/aircrafts/${id}`);
+    await api.delete(`/aircraft/${id}`);
   },
 };

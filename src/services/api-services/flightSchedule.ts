@@ -13,7 +13,7 @@ export const flightSchedulesApi = {
   async getSchedules(): Promise<FlightSchedule[]> {
 
     const response = await api.get<ApiResponse<FlightSchedule[]>>(
-      '/flight-schedules',
+      '/schedules',
     );
 
     return response.data.data ?? [];
@@ -24,7 +24,7 @@ export const flightSchedulesApi = {
   ): Promise<FlightSchedule | null> {
 
     const response = await api.get<ApiResponse<FlightSchedule>>(
-      `/flight-schedules/${id}`,
+      `/schedules/${id}`,
     );
 
     return response.data.data;
@@ -35,7 +35,7 @@ export const flightSchedulesApi = {
   ): Promise<FlightSchedule | null> {
 
     const response = await api.post<ApiResponse<FlightSchedule>>(
-      '/flight-schedules',
+      '/schedules',
       payload,
     );
 
@@ -48,7 +48,7 @@ export const flightSchedulesApi = {
   ): Promise<FlightSchedule | null> {
 
     const response = await api.put<ApiResponse<FlightSchedule>>(
-      `/flight-schedules/${id}`,
+      `/schedules/${id}`,
       payload,
     );
 

@@ -9,7 +9,7 @@ import type {
 export const airportsApi = {
   async getAirports(): Promise<Airport[]> {
     const response = await api.get<ApiResponse<Airport[]>>(
-      '/airports',
+      '/airport',
     );
 
     return response.data.data ?? [];
@@ -20,7 +20,7 @@ export const airportsApi = {
   ): Promise<Airport | null> {
 
     const response = await api.get<ApiResponse<Airport>>(
-      `/airports/${id}`,
+      `/airport/${id}`,
     );
 
     return response.data.data;
@@ -31,7 +31,7 @@ export const airportsApi = {
   ): Promise<Airport | null> {
 
     const response = await api.post<ApiResponse<Airport>>(
-      '/airports',
+      '/airport',
       payload,
     );
 
@@ -44,7 +44,7 @@ export const airportsApi = {
   ): Promise<Airport | null> {
 
     const response = await api.put<ApiResponse<Airport>>(
-      `/airports/${id}`,
+      `/airport/${id}`,
       payload,
     );
 
@@ -55,6 +55,6 @@ export const airportsApi = {
     id: string,
   ): Promise<void> {
 
-    await api.delete(`/airports/${id}`);
+    await api.delete(`/airport/${id}`);
   },
 };

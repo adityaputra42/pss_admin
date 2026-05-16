@@ -2,17 +2,16 @@ import {  Routes, Route, Navigate} from 'react-router-dom';
 import LoginPage from './pages/Login';
 import DashboardPage from './pages/Dashboard';
 import UsersPage from './pages/Users/UsersPage';
-import RolesPage from './pages/Roles/RolesPage'; // Placeholder
-import ProductsPage from './pages/Products/ProductsPage';
-import OrdersPage from './pages/Orders/OrdersPage';
-import TransactionsPage from './pages/Transactions/TransactionsPage';
-import ShippingPage from './pages/Shipping/ShippingPage';
+import RolesPage from './pages/Roles/RolesPage';
 import PaymentsPage from './pages/Payments/PaymentsPage';
-import PaymentMethodPage from './pages/Payments/PaymentMethodPage';
 import { useAuthStore } from './hooks/useAuth';
 import ProtectedRoute from './guards/ProtectedRoute';
 import ProfilePage from './pages/Profile';
-import CategoryPage from './pages/category/CategoryPage';
+import FlightsPage from './pages/FlightOperations/FlightsPage';
+import FlightSchedulesPage from './pages/FlightOperations/FlightSchedulePage';
+import RoutesPage from './pages/FlightOperations/RoutePage';
+import AirportPage from './pages/FlightOperations/AirportPage';
+import AircraftPage from './pages/FlightOperations/AircraftPage';
 
 const App = () => {
 const { isAuthenticated } = useAuthStore();
@@ -25,13 +24,12 @@ console.log('AUTH:', isAuthenticated);
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/users" element={<UsersPage />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/categories" element={<CategoryPage />} />
-          <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/transactions" element={<TransactionsPage />} />
-          <Route path="/shipping" element={<ShippingPage />} />
+          <Route path="/flights" element={<FlightsPage />} />
+          <Route path="/flight-schedules" element={<FlightSchedulesPage />} />
+          <Route path="/routes" element={<RoutesPage />} />
+          <Route path="/airports" element={<AirportPage />} />
+          <Route path="/aircraft" element={<AircraftPage />} />
           <Route path="/payments" element={<PaymentsPage />} />
-          <Route path="/payment-methods" element={<PaymentMethodPage />} />
           <Route path="/roles" element={<RolesPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
