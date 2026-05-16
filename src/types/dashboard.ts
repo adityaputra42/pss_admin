@@ -1,44 +1,33 @@
-// Dashboard types - using API types as source of truth
 import type {
-  DashboardStats,
-  RevenueStats,
-  OrderStats,
-  RecentOrder,
-  TopProduct,
-  LowStockProduct,
-  OrderAnalytic,
-  UserGrowth,
-  ActivityLog,
+  DashboardSummary,
+  RevenueTrend,
+  BookingStatus,
+  TodayFlight,
+  RecentBooking,
+  OperationalAlert,
 } from './api';
 
-// Re-export API types for backward compatibility
 export type {
-  DashboardStats,
-  RevenueStats,
-  OrderStats,
-  ActivityLog,
+  DashboardSummary,
+  RevenueTrend,
+  BookingStatus,
+  TodayFlight,
+  RecentBooking,
+  OperationalAlert,
 };
 
-// Aliases for consistency
-export type Order = RecentOrder;
-export type ProductSummary = TopProduct;
-export type OrderAnalytics = OrderAnalytic;
-export type UserAnalytics = UserGrowth;
-
-// Dashboard state interface
 export interface DashboardState {
-  stats: DashboardStats | null;
-  revenue: RevenueStats | null;
-  orderStats: OrderStats | null;
+  summary: DashboardSummary | null;
 
-  recentOrders: RecentOrder[];
-  topProducts: TopProduct[];
-  lowStockProducts: LowStockProduct[];
+  revenueTrend: RevenueTrend[];
 
-  orderAnalytics: OrderAnalytic[];
-  userAnalytics: UserGrowth[];
+  bookingStatus: BookingStatus[];
 
-  recentActivity: ActivityLog[];
+  todayFlights: TodayFlight[];
+
+  recentBookings: RecentBooking[];
+
+  alerts: OperationalAlert[];
 
   isLoading: boolean;
   error: string | null;

@@ -5,7 +5,7 @@
 
 export { dashboardApi } from './dashboard';
 export { usersApi } from './users';
-export { productsApi } from './products';
+export { productsApi } from './flight';
 export { ordersApi } from './orders';
 export { paymentsApi } from './payments';
 export { paymentMethodsApi } from './paymentMethods';

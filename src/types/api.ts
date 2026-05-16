@@ -1,391 +1,420 @@
-// ============================================
-// Dashboard Types
-// ============================================
+// ======================================================
+// GENERIC API
+// ======================================================
 
-export interface DashboardStats {
-  total_users: number;
-  active_users: number;
-  total_products: number;
-  total_orders: number;
+import type { Role } from "./rbac";
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
 }
 
-export interface RevenueStats {
-  total_revenue: number;
-  monthly_revenue: number;
-  revenue_growth: number;
-}
-
-export interface OrderStats {
-  total_orders: number;
-  pending_orders: number;
-  completed_orders: number;
-  cancelled_orders: number;
-}
-
-export interface OrderAnalytic {
-  date: string;
-  order_count: number;
-  total_amount: number;
-}
-
-export interface UserGrowth {
-  date: string;
-  user_count: number;
-}
-
-export interface TopProduct {
-  id: number;
-  name: string;
-  total_sold: number;
-  revenue: number;
-}
-
-export interface LowStockProduct {
-  id: number;
-  name: string;
-  stock: number;
-  category: string;
-}
-
-export interface RecentOrder {
-  id: number;
-  user_id: number;
-  total_amount: number;
-  status: string;
-  created_at: string;
-  user?: {
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
-}
-
-export interface SystemHealth {
-  database: string;
-  cache: string;
-  storage: string;
-}
-
-export interface ActivityLog {
-  id: number;
-  user_id: number;
-  action: string;
-  resource: string;
-  resource_id?: number;
-  created_at: string;
-  user?: {
-    username: string;
-    first_name: string;
-    last_name: string;
-  };
-}
-
-// ============================================
-// User Types
-// ============================================
-
-export interface User {
-  id: number;
-  username: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  phone_number?: string;
-  is_active: boolean;
-  role_id: number;
-  role?: {
-    id: number;
-    name: string;
-  };
-  created_at: string;
-  updated_at: string;
-  last_login_at?: string;
-  permissions?: string[];
-}
-
-export interface UserInput {
-  username: string;
-  email: string;
-  password: string;
-  first_name: string;
-  last_name: string;
-  phone_number?: string;
-  role_id: number;
-}
-
-export interface UserUpdateInput {
-  username?: string;
-  email?: string;
-  first_name?: string;
-  last_name?: string;
-  phone_number?: string;
-  role_id?: number;
-}
-
-export interface PasswordUpdateInput {
-  new_password: string;
-}
-
-export interface UserListResponse {
-  users: User[];
-  total: number;
+export interface PaginationMeta {
   page: number;
   limit: number;
+  total: number;
+  total_pages: number;
 }
 
-// ============================================
-// Product Types
-// ============================================
-
-export interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  category_id: number;
-  category?: {
-    id: number;
-    name: string;
-    icon: string;
-  };
-  images: string[];
-  rating: number;
-  color_varian?: ColorVariant[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ColorVariant {
-  id: number;
-  product_id: number;
-  color_name: string;
-  color_hex: string;
-  images: string | string[];
-}
-
-export interface ProductInput {
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  category_id: number;
-}
-
-export interface Category {
-  id: number;
-  name: string;
-  icon: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CategoryInput {
-  name: string;
-  icon: File;
-
-}
-
-// ============================================
-// Order Types
-// ============================================
-
-export interface Order {
-  id: number;
-  user_id: number;
-  total_amount: number;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  user?: {
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
-  order_items?: OrderItem[];
-}
-
-export interface OrderItem {
-  id: number;
-  order_id: number;
-  product_id: number;
-  quantity: number;
-  price: number;
-  product?: {
-    name: string;
-    images: string[];
-  };
-}
-
-export interface OrderUpdateInput {
-  status: string;
-}
-
-// ============================================
-// Payment Types
-// ============================================
-
-export interface Payment {
-  id: number;
-  transaction_id: string;
-  total_payment: number;
-  status: string;
-  payment_method_id?: number;
-  payment_method?: PaymentMethod;
-  transaction?: Transaction;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface PaymentMethod {
-  id: number;
-  account_name: string;
-  account_number: string;
-  bank_name: string;
-  bank_images: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface PaymentMethodInput {
-  account_name: string;
-  account_number: string;
-  bank_name: string;
-  bank_image: File;
-}
-
-export interface PaymentMethodUpdateInput {
-  account_name?: string;
-  account_number?: string;
-  bank_name?: string;
-  is_active?: boolean;
-  bank_image?: File;
-}
-
-// ============================================
-// Transaction Types
-// ============================================
-
-export interface Transaction {
-  tx_id: string;
-  user_id: number;
-  total_amount: number;
-  status: string;
-  payment_method_id: number;
-  shipping_id: number;
-  address_id: number;
-  created_at: string;
-  updated_at: string;
-  user?: User;
-  payment_method?: PaymentMethod;
-  shipping?: ShippingMethod;
-  transaction_items?: TransactionItem[];
-}
-
-export interface TransactionItem {
-  id: number;
-  transaction_id: string;
-  product_id: number;
-  quantity: number;
-  price: number;
-  product?: Product;
-}
-
-export interface TransactionUpdateInput {
-  status: string;
-}
-
-export interface CreateTransactionInput {
-  address_id: number;
-  shipping_id: number;
-  payment_method_id: number;
-  product_orders: {
-    product_id: number;
-    quantity: number;
-    color_id?: number;
-  }[];
-}
-
-// ============================================
-// Shipping Types
-// ============================================
-
-export interface ShippingMethod {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  estimated_days: number;
-  state: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ShippingInput {
-  name: string;
-  description: string;
-  price: number;
-  estimated_days: number;
-}
-
-export interface ShippingUpdateInput {
-  name?: string;
-  description?: string;
-  price?: number;
-  estimated_days?: number;
-  is_active?: boolean;
-}
-
-// ============================================
-// Role Types
-// ============================================
-
-export interface Role {
-  id: number;
-  name: string;
-  description?: string;
-  created_at: string;
-  updated_at: string;
-  is_system_role?: boolean;
-  permissions?: Permission[];
-}
-
-export interface Permission {
-  id: number;
-  name: string;
-  resource: string;
-  action: string;
-  description?: string;
-}
+// ======================================================
+// ROLE
+// ======================================================
 
 export interface RoleInput {
   name: string;
+
   description?: string;
+
+  level: number;
+
+  permission_ids?: number[];
 }
 
 export interface RoleUpdateInput {
   name?: string;
+
   description?: string;
+
+  level?: number;
+
+  permission_ids?: number[];
 }
+
+// ======================================================
+// ASSIGN PERMISSION
+// ======================================================
 
 export interface AssignPermissionsInput {
   permission_ids: number[];
 }
 
-// ============================================
-// API Response Types
-// ============================================
+// ======================================================
+// ROLE LIST RESPONSE
+// ======================================================
 
-export interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T | null;
+export interface RoleListResponse {
+  items: Role[];
+
+  total: number;
+
+  page: number;
+
+  limit: number;
+
+  total_pages: number;
+}
+// ======================================================
+// USER
+// ======================================================
+
+export interface User {
+  uid: string;
+  email: string;
+  full_name: string;
+
+  role_id: number;
+  role?: Role;
+
+  is_active?: boolean;
+
+  created_at?: string;
+  updated_at?: string;
+  last_login?: string | null;
+  deleted_at?: string | null;
 }
 
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
+export interface UserInput {
+  email: string;
+  full_name: string;
+  password: string;
+  role_id: number;
+}
+
+export interface UserUpdateInput {
+  email?: string;
+  full_name?: string;
+  role_id?: number;
+  is_active?: boolean;
+}
+
+export interface PasswordUpdateInput {
+  old_password?: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+export interface UserListResponse {
+  items: User[];
+  meta: PaginationMeta;
+}
+
+// ======================================================
+// AIRPORT
+// ======================================================
+
+export interface Airport {
+  id: string;
+  code: string;
+  name: string;
+  city: string;
+  country: string;
+  timezone?: string;
+}
+
+export interface AirportInput {
+  code: string;
+  name: string;
+  city: string;
+  country: string;
+  timezone?: string;
+}
+
+export interface AirportListResponse {
+  items: Airport[];
+  meta: PaginationMeta;
+}
+
+// ======================================================
+// AIRCRAFT
+// ======================================================
+
+export interface Aircraft {
+  id: string;
+  model: string;
+  manufacturer: string;
+  total_seats: number;
+}
+
+export interface AircraftInput {
+  model: string;
+  manufacturer: string;
+  total_seats: number;
+}
+
+export interface AircraftListResponse {
+  items: Aircraft[];
+  meta: PaginationMeta;
+}
+
+// ======================================================
+// FLIGHT SCHEDULE
+// ======================================================
+
+export interface FlightSchedule {
+  id: string;
+
+  flight_number: string;
+
+  departure_airport_id: string;
+  arrival_airport_id: string;
+
+  departure_airport?: Airport;
+  arrival_airport?: Airport;
+
+  departure_time: string;
+  arrival_time: string;
+
+  operating_days: string;
+}
+
+export interface FlightScheduleInput {
+  flight_number: string;
+
+  departure_airport_id: string;
+  arrival_airport_id: string;
+
+  departure_time: string;
+  arrival_time: string;
+
+  operating_days: string;
+}
+
+export interface FlightScheduleListResponse {
+  items: FlightSchedule[];
+  meta: PaginationMeta;
+}
+
+// ======================================================
+// FLIGHT
+// ======================================================
+
+export interface Flight {
+  id: string;
+
+  schedule_id: string;
+  aircraft_id: string;
+
+  schedule?: FlightSchedule;
+  aircraft?: Aircraft;
+
+  departure_time: string;
+  arrival_time: string;
+
+  status:
+    | 'scheduled'
+    | 'boarding'
+    | 'departed'
+    | 'arrived'
+    | 'cancelled'
+    | 'delayed';
+
+  created_at?: string;
+}
+
+export interface FlightInput {
+  schedule_id: string;
+  aircraft_id: string;
+
+  departure_time: string;
+  arrival_time: string;
+
+  status?: string;
+}
+
+export interface FlightListResponse {
+  items: Flight[];
+  meta: PaginationMeta;
+}
+
+// ======================================================
+// PNR / BOOKING
+// ======================================================
+
+export interface Passenger {
+  id: string;
+
+  first_name: string;
+  last_name: string;
+
+  passenger_type: string;
+
+  passport_number?: string;
+}
+
+export interface PNR {
+  id: string;
+
+  record_locator: string;
+
+  status: string;
+
+  passengers?: Passenger[];
+
+  created_at: string;
+  ttl?: string;
+}
+
+export interface BookingListResponse {
+  items: PNR[];
+  meta: PaginationMeta;
+}
+
+// ======================================================
+// PAYMENT
+// ======================================================
+
+export interface Payment {
+  id: string;
+
+  pnr_id: string;
+
+  amount: number;
+
+  method: string;
+
+  status: string;
+
+  paid_at?: string;
+}
+
+export interface PaymentListResponse {
+  items: Payment[];
+  meta: PaginationMeta;
+}
+
+// ======================================================
+// BAGGAGE
+// ======================================================
+
+export interface Baggage {
+  id: string;
+
+  passenger_id: string;
+  segment_id: string;
+
+  weight: number;
+
+  tag_number: string;
+
+  status: string;
+}
+
+export interface BaggageListResponse {
+  items: Baggage[];
+  meta: PaginationMeta;
+}
+
+// ======================================================
+// CHECKIN
+// ======================================================
+
+export interface Checkin {
+  id: string;
+
+  passenger_id: string;
+
+  segment_id: string;
+
+  checkin_time: string;
+}
+
+export interface CheckinListResponse {
+  items: Checkin[];
+  meta: PaginationMeta;
+}
+
+// ======================================================
+// BOARDING PASS
+// ======================================================
+
+export interface BoardingPass {
+  id: string;
+
+  passenger_id: string;
+
+  segment_id: string;
+
+  boarding_group: string;
+
+  gate: string;
+
+  boarding_time: string;
+
+  qr_code?: string;
+}
+
+export interface BoardingPassListResponse {
+  items: BoardingPass[];
+  meta: PaginationMeta;
+}
+
+// ======================================================
+// DASHBOARD
+// ======================================================
+
+export interface DashboardSummary {
+  total_bookings: number;
+  total_passengers: number;
+  today_flights: number;
+  total_revenue: number;
+}
+
+export interface RevenueTrend {
+  date: string;
+  revenue: number;
+}
+
+export interface BookingStatus {
+  status: string;
+  value: number;
+}
+
+export interface TodayFlight {
+  id: string;
+
+  flight_number: string;
+
+  origin: string;
+  destination: string;
+
+  departure_time: string;
+
+  aircraft: string;
+
+  passenger_count: number;
+
+  status: string;
+}
+
+export interface RecentBooking {
+  id: string;
+
+  booking_code: string;
+
+  passenger_name: string;
+
+  route: string;
+
+  payment_status: string;
+}
+
+export interface OperationalAlert {
+  id: string;
+
+  title: string;
+
+  description: string;
+
+  time: string;
 }

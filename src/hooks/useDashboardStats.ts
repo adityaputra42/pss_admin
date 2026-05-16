@@ -1,21 +1,22 @@
 import { useEffect, useState, useCallback } from 'react';
+
 import { dashboardApi } from '../services/api-services/dashboard';
+
 import type { DashboardState } from '../types/dashboard';
 
 export const useDashboardData = () => {
   const [data, setData] = useState<DashboardState>({
-    stats: null,
-    revenue: null,
-    orderStats: null,
+    summary: null,
 
-    recentOrders: [],
-    topProducts: [],
-    lowStockProducts: [],
+    revenueTrend: [],
 
-    orderAnalytics: [],
-    userAnalytics: [],
+    bookingStatus: [],
 
-    recentActivity: [],
+    todayFlights: [],
+
+    recentBookings: [],
+
+    alerts: [],
 
     isLoading: true,
     error: null,
@@ -30,73 +31,52 @@ export const useDashboardData = () => {
 
     try {
       const results = await Promise.allSettled([
-        dashboardApi.getDashboardStats(),
-        dashboardApi.getRevenueStats(),
-        dashboardApi.getOrderStats(),
-        dashboardApi.getRecentOrders(),
-        dashboardApi.getTopProducts(),
-        dashboardApi.getLowStockProducts(),
-        dashboardApi.getOrderAnalytics(),
-        dashboardApi.getUserGrowth(),
-        dashboardApi.getRecentActivity(),
+        dashboardApi.getSummary(),
+        dashboardApi.getRevenueTrend(),
+        dashboardApi.getBookingStatus(),
+        dashboardApi.getTodayFlights(),
+        dashboardApi.getRecentBookings(),
+        dashboardApi.getAlerts(),
       ]);
 
       const [
-        statsRes,
-        revenueRes,
-        orderStatsRes,
-        recentOrdersRes,
-        topProductsRes,
-        lowStockRes,
-        orderAnalyticsRes,
-        userAnalyticsRes,
-        activityRes,
+        summaryRes,
+        revenueTrendRes,
+        bookingStatusRes,
+        todayFlightsRes,
+        recentBookingsRes,
+        alertsRes,
       ] = results;
 
       setData({
-        stats:
-          statsRes.status === 'fulfilled'
-            ? statsRes.value ?? null
+        summary:
+          summaryRes.status === 'fulfilled'
+            ? summaryRes.value ?? null
             : null,
 
-        revenue:
-          revenueRes.status === 'fulfilled'
-            ? revenueRes.value ?? null
-            : null,
-
-        orderStats:
-          orderStatsRes.status === 'fulfilled'
-            ? orderStatsRes.value ?? null
-            : null,
-
-        recentOrders:
-          recentOrdersRes.status === 'fulfilled'
-            ? recentOrdersRes.value ?? []
+        revenueTrend:
+          revenueTrendRes.status === 'fulfilled'
+            ? revenueTrendRes.value ?? []
             : [],
 
-        topProducts:
-          topProductsRes.status === 'fulfilled'
-            ? topProductsRes.value ?? []
+        bookingStatus:
+          bookingStatusRes.status === 'fulfilled'
+            ? bookingStatusRes.value ?? []
             : [],
 
-        lowStockProducts:
-          lowStockRes.status === 'fulfilled'
-            ? lowStockRes.value ?? []
+        todayFlights:
+          todayFlightsRes.status === 'fulfilled'
+            ? todayFlightsRes.value ?? []
             : [],
 
-        orderAnalytics:
-          orderAnalyticsRes.status === 'fulfilled'
-            ? orderAnalyticsRes.value ?? []
+        recentBookings:
+          recentBookingsRes.status === 'fulfilled'
+            ? recentBookingsRes.value ?? []
             : [],
 
-        userAnalytics:
-          userAnalyticsRes.status === 'fulfilled'
-            ? userAnalyticsRes.value ?? []
-            : [],
-
-        recentActivity:
-          activityRes.status === 'fulfilled'
-            ? activityRes.value ?? []
+        alerts:
+          alertsRes.status === 'fulfilled'
+            ? alertsRes.value ?? []
             : [],
 
         isLoading: false,
@@ -104,6 +84,7 @@ export const useDashboardData = () => {
       });
     } catch (err) {
       console.error('Dashboard fetch error:', err);
+
       setData((prev) => ({
         ...prev,
         isLoading: false,

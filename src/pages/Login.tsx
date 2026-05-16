@@ -31,23 +31,23 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-white selection:bg-teal-100 overflow-hidden">
-      {/* Visual Side - Hidden on Mobile, Side on Desktop */}
+
       <div className="hidden lg:flex lg:w-1/2 relative bg-primary overflow-hidden items-center justify-center p-12">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-400 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl"></div>
         </div>
-        
+
         <div className="relative z-10 max-w-lg text-center animate-in fade-in slide-in-from-left-8 duration-1000">
            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white/90 text-sm font-bold tracking-wider uppercase mb-8 border border-white/20">
               <Sparkles className="w-4 h-4 text-amber-300" />
               <span>Next Gen Admin Panel</span>
            </div>
            <h1 className="text-5xl xl:text-6xl font-black text-white leading-tight tracking-tighter mb-6">
-              Manage your store with <span className="text-teal-200">Confidence.</span>
+             Centralize passenger service management with <span className="text-teal-200">Confidence.</span>
            </h1>
            <p className="text-lg text-teal-100 font-medium mb-12 leading-relaxed opacity-80">
-              Experience the fastest way to handle orders, products, and customer insights in one unified dashboard.
+              Experience the fastest way to manage flights, bookings, and passenger operations in one unified dashboard.
            </p>
 
            <div className="grid grid-cols-2 gap-6">
@@ -68,7 +68,7 @@ const LoginPage = () => {
       {/* Form Side */}
       <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-20 bg-slate-50 relative">
         <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-teal-500 via-purple-500 to-teal-500 lg:hidden"></div>
-        
+
         <div className="w-full max-w-md space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
           <div className="text-center lg:text-left">
             <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-2xl shadow-teal-200 mx-auto lg:mx-0 mb-6 group hover:rotate-6 transition-transform">
