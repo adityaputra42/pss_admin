@@ -1,8 +1,8 @@
-
 import type {
   ApiResponse,
   PNR,
 } from '../../types/api';
+
 import api from '../api-client';
 
 export const bookingsApi = {
@@ -10,37 +10,74 @@ export const bookingsApi = {
     page: number = 1,
     limit: number = 10,
   ): Promise<PNR[]> {
-
-    const response = await api.get<ApiResponse<PNR[]>>(
-      '/bookings',
-      {
+    const response =
+      await api.get<
+        ApiResponse<PNR[]>
+      >('/bookings', {
         params: {
           page,
           limit,
         },
-      },
+      });
+
+    console.log(
+      'GET BOOKINGS RESPONSE:',
+      response.data,
     );
 
-    return response.data.data ?? [];
+    const data =
+      response.data?.data;
+
+    return Array.isArray(data)
+      ? data
+      : [];
   },
 
   async getBookingById(
     id: string,
   ): Promise<PNR | null> {
+    const response =
+      await api.get<
+        ApiResponse<PNR>
+      >(`/bookings/${id}`);
 
-    const response = await api.get<ApiResponse<PNR>>(
-      `/bookings/${id}`,
+    console.log(
+      'GET BOOKING DETAIL RESPONSE:',
+      response.data,
     );
 
-    return response.data.data;
+    return (
+      response.data?.data ??
+      null
+    );
+  },
+
+  async getBookingByLocator(
+    locator: string,
+  ): Promise<PNR | null> {
+    const response =
+      await api.get<
+        ApiResponse<PNR>
+      >(
+        `/bookings/locator/${locator}`,
+      );
+
+    console.log(
+      'GET BOOKING LOCATOR RESPONSE:',
+      response.data,
+    );
+
+    return (
+      response.data?.data ??
+      null
+    );
   },
 
   async cancelBooking(
     id: string,
   ): Promise<void> {
-
-    await api.patch(
-      `/bookings/${id}/cancel`,
+    await api.delete(
+      `/bookings/${id}`,
     );
   },
 };

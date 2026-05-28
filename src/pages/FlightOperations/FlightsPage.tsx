@@ -41,39 +41,25 @@ const FlightsPage = () => {
     fetchFlights();
   }, []);
 
-  const fetchFlights = async () => {
-    if (!dep || !arr || !date) {
-      showErrorAlert('Departure, arrival and date are required');
-      return;
-    }
+const fetchFlights = async () => {
+  if (!dep || !arr || !date) {
+    showErrorAlert('Departure, arrival and date are required');
+    return;
+  }
 
-    setIsLoading(true);
-    setError('');
+  setIsLoading(true);
+  setError('');
 
-    try {
-      const response = await flightsApi.getFlights(dep, arr, date);
-
-      /**
-       * Backend response:
-       * {
-       *   success: true,
-       *   data: {
-       *      flights: []
-       *   }
-       * }
-       */
-
-      const flightData = response.values ?? [];
-
-      setFlights(Array.isArray(flightData) ? flightData : []);
-    } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to fetch flights');
-      setFlights([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  try {
+    const response = await flightsApi.getFlights(dep, arr, date);
+  setFlights(response);
+  } catch (err: any) {
+    setError(err?.response?.data?.message || 'Failed to fetch flights');
+    setFlights([]);
+  } finally {
+    setIsLoading(false);
+  }
+};
   const handleSearch = () => {
     fetchFlights();
   };

@@ -1,5 +1,6 @@
-import type { Role } from '../../types/api';
+
 import { Edit3, Trash2, Eye, ShieldCheck, ShieldAlert } from 'lucide-react';
+import type { Role } from '../../types/rbac';
 
 interface RoleTableProps {
   roles: Role[];
@@ -36,8 +37,8 @@ const RoleTable: React.FC<RoleTableProps> = ({ roles, onEdit, onDelete, onViewDe
                 <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-500 font-medium max-w-xs truncate">{role.description}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
-                       role.is_system_role 
-                       ? 'bg-slate-100 text-slate-600' 
+                       role.is_system_role
+                       ? 'bg-slate-100 text-slate-600'
                        : 'bg-emerald-50 text-emerald-700'
                    }`}>
                      {role.is_system_role ? 'System' : 'Custom'}
@@ -51,23 +52,23 @@ const RoleTable: React.FC<RoleTableProps> = ({ roles, onEdit, onDelete, onViewDe
                 </td>
                 <td className="px-6 py-4 text-right whitespace-nowrap">
                    <div className="flex items-center justify-end gap-1">
-                      <button 
-                        onClick={() => onViewDetails(role)} 
+                      <button
+                        onClick={() => onViewDetails(role)}
                         className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded-lg transition-all"
                         title="View Permissions"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button 
-                        onClick={() => onEdit(role)} 
+                      <button
+                        onClick={() => onEdit(role)}
                         className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded-lg transition-all"
                         title="Edit Role"
                       >
                         <Edit3 className="w-4 h-4" />
                       </button>
                       {!role.is_system_role && (
-                        <button 
-                            onClick={() => onDelete(role)} 
+                        <button
+                            onClick={() => onDelete(role)}
                             className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
                             title="Delete Role"
                         >

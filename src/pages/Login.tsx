@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../hooks/useAuth';
 import { authApi } from '../services/api-services';
 import { Lock, Mail, ChevronRight, LayoutDashboard, ShieldCheck, Sparkles } from 'lucide-react';
+import Slide from '../components/animations/Slide';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -32,13 +33,14 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-white selection:bg-teal-100 overflow-hidden">
 
-      <div className="hidden lg:flex lg:w-1/2 relative bg-primary overflow-hidden items-center justify-center p-12">
+    <Slide direction="right"   className="hidden lg:flex lg:w-1/2" delay={0.2}>
+    <div className="relative w-full flex items-center justify-center bg-primary overflow-hidden p-12">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-400 rounded-full translate-x-1/2 translate-y-1/2 blur-3xl"></div>
         </div>
 
-        <div className="relative z-10 max-w-lg text-center animate-in fade-in slide-in-from-left-8 duration-1000">
+        <div className="relative z-10 max-w-lg text-center    duration-1000">
            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white/90 text-sm font-bold tracking-wider uppercase mb-8 border border-white/20">
               <Sparkles className="w-4 h-4 text-amber-300" />
               <span>Next Gen Admin Panel</span>
@@ -65,11 +67,13 @@ const LoginPage = () => {
         </div>
       </div>
 
+</Slide>
       {/* Form Side */}
-      <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-20 bg-slate-50 relative">
+   <Slide direction="left" className="flex-1 justify-center items-center" delay={0.2}>
+     <div className="flex flex-col justify-center items-center p-6 sm:p-12 lg:p-20 bg-slate-50 relative">
         <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-teal-500 via-purple-500 to-teal-500 lg:hidden"></div>
 
-        <div className="w-full max-w-md space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+        <div className="w-full max-w-md space-y-10   duration-700">
           <div className="text-center lg:text-left">
             <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-2xl shadow-teal-200 mx-auto lg:mx-0 mb-6 group hover:rotate-6 transition-transform">
                <Lock className="text-white w-8 h-8" />
@@ -113,7 +117,7 @@ const LoginPage = () => {
             </div>
 
             {error && (
-              <div className="bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-xl text-xs font-bold flex items-center gap-3 animate-in fade-in zoom-in-95">
+              <div className="bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-xl text-xs font-bold flex items-center gap-3 ">
                  <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></div>
                  {error}
               </div>
@@ -140,6 +144,7 @@ const LoginPage = () => {
           </p>
         </div>
       </div>
+      </Slide>
     </div>
   );
 };

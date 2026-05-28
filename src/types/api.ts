@@ -198,18 +198,19 @@ export interface FlightScheduleListResponse {
 // ======================================================
 // FLIGHT
 // ======================================================
-
 export interface Flight {
   id: string;
-
-  schedule_id: string;
-  aircraft_id: string;
+  flight_number: string;
 
   schedule?: FlightSchedule;
   aircraft?: Aircraft;
 
   departure_time: string;
   arrival_time: string;
+
+  duration_minutes: number;
+  available_seats: number;
+  lowest_price: number;
 
   status:
     | 'scheduled'
@@ -218,10 +219,7 @@ export interface Flight {
     | 'arrived'
     | 'cancelled'
     | 'delayed';
-
-  created_at?: string;
 }
-
 export interface FlightInput {
   schedule_id: string;
   aircraft_id: string;
@@ -231,12 +229,9 @@ export interface FlightInput {
 
   status?: string;
 }
-
-export interface FlightListResponse {
-  items: Flight[];
-  meta: PaginationMeta;
+export interface FlightsResponse {
+  flights: Flight[];
 }
-
 // ======================================================
 // PNR / BOOKING
 // ======================================================

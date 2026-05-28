@@ -12,6 +12,11 @@ import FlightSchedulesPage from './pages/FlightOperations/FlightSchedulePage';
 import RoutesPage from './pages/FlightOperations/RoutePage';
 import AirportPage from './pages/FlightOperations/AirportPage';
 import AircraftPage from './pages/FlightOperations/AircraftPage';
+import PageTransition from './components/animations/PageTransition';
+import BookingPage from './pages/Booking/BookingPage';
+import CheckinPage from './pages/Booking/CheckinPage';
+import BoardingPassPage from './pages/Booking/BoardingPassPage';
+import BaggagePage from './pages/Booking/BaggagePage';
 
 const App = () => {
 const { isAuthenticated } = useAuthStore();
@@ -20,18 +25,22 @@ console.log('CURRENT PATH:', window.location.pathname);
 console.log('AUTH:', isAuthenticated);
   return (
       <Routes>
-        <Route path="/login" element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" />} />
+        <Route path="/login" element={!isAuthenticated ? <PageTransition> <LoginPage /></PageTransition> : <Navigate to="/dashboard" />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/users" element={<UsersPage />} />
-          <Route path="/flights" element={<FlightsPage />} />
-          <Route path="/flight-schedules" element={<FlightSchedulesPage />} />
-          <Route path="/routes" element={<RoutesPage />} />
-          <Route path="/airports" element={<AirportPage />} />
-          <Route path="/aircraft" element={<AircraftPage />} />
-          <Route path="/payments" element={<PaymentsPage />} />
-          <Route path="/roles" element={<RolesPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/dashboard" element={<PageTransition><DashboardPage /></PageTransition>} />
+          <Route path="/users" element={<PageTransition><UsersPage /></PageTransition> } />
+          <Route path="/flights" element={<PageTransition><FlightsPage /></PageTransition>} />
+          <Route path="/flight-schedules" element={<PageTransition><FlightSchedulesPage /></PageTransition>} />
+          <Route path="/routes" element={<PageTransition><RoutesPage /></PageTransition>} />
+          <Route path="/airports" element={<PageTransition><AirportPage /></PageTransition>} />
+          <Route path="/aircraft" element={<PageTransition><AircraftPage /></PageTransition>} />
+          <Route path="/payments" element={<PageTransition><PaymentsPage /></PageTransition>} />
+          <Route path="/roles" element={<PageTransition><RolesPage /></PageTransition>} />
+          <Route path="/profile" element={<PageTransition><ProfilePage /></PageTransition>} />
+          <Route path="/bookings" element={<PageTransition><BookingPage /></PageTransition>} />
+          <Route path="/check-in" element={<PageTransition><CheckinPage /></PageTransition>} />
+          <Route path="/boarding-pass" element={<PageTransition><BoardingPassPage /></PageTransition>} />
+          <Route path="/baggage" element={<PageTransition><BaggagePage /></PageTransition>} />
         </Route>
         <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
       </Routes>

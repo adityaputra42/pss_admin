@@ -1,7 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import type { Role } from '../../types/api';
 import { X, Shield, Users, Key } from 'lucide-react';
+import type { Role } from '../../types/rbac';
 
 interface RoleDetailModalProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ isOpen, onClose, role
                     <Shield className="w-6 h-6 mr-2 text-primary" />
                     Role Details: {role.name}
                   </Dialog.Title>
-                  <button 
+                  <button
                     onClick={onClose}
                     className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
                   >
@@ -66,10 +66,10 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ isOpen, onClose, role
                     <div className="mt-4">
                       <label className="block text-sm font-medium text-gray-700">Created</label>
                       <p className="mt-1 text-sm text-gray-900">
-                        {new Date(role.created_at).toLocaleDateString('en-US', { 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric' 
+                        {new Date(role.created_at).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
                         })}
                       </p>
                     </div>
@@ -84,8 +84,8 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ isOpen, onClose, role
                     {role.permissions && role.permissions.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {role.permissions.map((permission) => (
-                          <div 
-                            key={permission.id} 
+                          <div
+                            key={permission.id}
                             className="bg-white p-3 rounded-md border border-teal-200 hover:border-teal-300 transition-colors"
                           >
                             <div className="flex items-start">
@@ -142,7 +142,7 @@ const RoleDetailModal: React.FC<RoleDetailModalProps> = ({ isOpen, onClose, role
                 </div>
 
                 <div className="mt-6 flex justify-end">
-                  <button 
+                  <button
                     onClick={onClose}
                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
                   >

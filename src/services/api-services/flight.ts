@@ -3,17 +3,21 @@ import api from '../api-client';
 import type {
   Flight,
   ApiResponse,
+  FlightsResponse,
 } from '../../types/api';
 
 export const flightsApi = {
-async getFlights(
+
+
+
+  async getFlights(
   dep?: string,
   arr?: string,
   date?: string,
 ): Promise<Flight[]> {
 
   const response = await api.get<
-    ApiResponse<Flight[]>
+    ApiResponse<FlightsResponse>
   >('/flights', {
     params: {
       dep: dep || undefined,
@@ -22,7 +26,7 @@ async getFlights(
     },
   });
 
-  return response.data.data ?? [];
+  return response.data.data?.flights ?? [];
 },
 
   async getFlightById(

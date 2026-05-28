@@ -12,7 +12,7 @@ const Header = () => {
       'Logout Confirmation',
       'Are you sure you want to logout?'
     );
-    
+
     if (confirmed) {
       logout();
       showSuccessAlert('Logged out successfully!');
@@ -26,9 +26,9 @@ const Header = () => {
       <div className="hidden lg:flex items-center flex-1 max-w-md">
          <div className="relative w-full group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-teal-500 transition-colors" />
-            <input 
-              type="text" 
-              placeholder="Search anything..." 
+            <input
+              type="text"
+              placeholder="Search anything..."
               className="w-full bg-slate-50 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 transition-all outline-none"
             />
          </div>
@@ -52,18 +52,18 @@ const Header = () => {
         {/* User profile */}
         <div className="flex items-center gap-3">
           <div className="hidden sm:block text-right">
-            <p className="text-sm font-bold text-slate-900 leading-tight">{user?.first_name} {user?.last_name}</p>
+            <p className="text-sm font-bold text-slate-900 leading-tight">{user?.full_name}</p>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Admin</p>
           </div>
-          
+
           <div className="group relative">
-              <button 
+              <button
                   className="flex items-center gap-2 p-0.5 md:p-1 rounded-xl hover:bg-slate-50 transition-colors"
                   onClick={handleLogout}
                   title="Logout"
               >
                 <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl overflow-hidden ring-2 ring-teal-50 shadow-sm transform group-active:scale-95 transition-transform">
-                     <img src={`https://ui-avatars.com/api/?name=${user?.first_name}+${user?.last_name}&background=6366f1&color=fff`} alt="Profile" />
+                     <img src={`https://ui-avatars.com/api/?name=${user?.full_name}&background=6366f1&color=fff`} alt="Profile" />
                 </div>
                 <LogOut className="w-4 h-4 text-slate-400 group-hover:text-rose-500 transition-colors hidden md:block" />
               </button>

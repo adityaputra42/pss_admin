@@ -5,6 +5,7 @@ export interface Role {
   created_at: string | number | Date;
   is_system_role: any;
   id: number;
+  level:number;
   name: string;
   description: string;
 }
