@@ -90,18 +90,18 @@ const BookingPage = () => {
         <div>
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4">Contact</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input placeholder="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} className="bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
-            <input placeholder="Email (optional)" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
-            <input placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
+            <input placeholder="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} className="bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
+            <input placeholder="Email (optional)" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
+            <input placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
           </div>
         </div>
 
         <div>
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4">Passenger</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
-            <input placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
-            <select value={passengerType} onChange={(e) => setPassengerType(e.target.value)} className="bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20">
+            <input placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
+            <input placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} className="bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
+            <select value={passengerType} onChange={(e) => setPassengerType(e.target.value)} className="bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20">
               <option value="ADULT">Adult</option>
               <option value="CHILD">Child</option>
               <option value="INFANT">Infant</option>
@@ -112,9 +112,9 @@ const BookingPage = () => {
         <div>
           <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4">Flight</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input type="number" placeholder="Flight ID" value={flightId} onChange={(e) => setFlightId(e.target.value)} className="bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
-            <input type="number" placeholder="Fare Class ID" value={fareClassId} onChange={(e) => setFareClassId(e.target.value)} className="bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
-            <input type="number" placeholder="Flight Seat ID (optional)" value={flightSeatId} onChange={(e) => setFlightSeatId(e.target.value)} className="bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
+            <input type="number" placeholder="Flight ID" value={flightId} onChange={(e) => setFlightId(e.target.value)} className="bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
+            <input type="number" placeholder="Fare Class ID" value={fareClassId} onChange={(e) => setFareClassId(e.target.value)} className="bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
+            <input type="number" placeholder="Flight Seat ID (optional)" value={flightSeatId} onChange={(e) => setFlightSeatId(e.target.value)} className="bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20" />
           </div>
         </div>
 
@@ -135,19 +135,19 @@ const BookingPage = () => {
             <h2 className="text-lg font-bold text-slate-900">Booking Created</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-slate-50 rounded-2xl p-4">
+            <div className="bg-slate-50 rounded-md p-4">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Booking Code</p>
               <h4 className="text-lg font-bold text-slate-900 mt-2">{result.BookingCode}</h4>
             </div>
-            <div className="bg-slate-50 rounded-2xl p-4">
+            <div className="bg-slate-50 rounded-md p-4">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">PNR ID</p>
               <h4 className="text-lg font-bold text-slate-900 mt-2">{result.PNRID}</h4>
             </div>
-            <div className="bg-slate-50 rounded-2xl p-4">
+            <div className="bg-slate-50 rounded-md p-4">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</p>
               <h4 className="text-lg font-bold text-slate-900 mt-2">{result.Status}</h4>
             </div>
-            <div className="bg-slate-50 rounded-2xl p-4">
+            <div className="bg-slate-50 rounded-md p-4">
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Total</p>
               <h4 className="text-lg font-bold text-slate-900 mt-2">{result.Currency} {result.TotalAmount}</h4>
             </div>

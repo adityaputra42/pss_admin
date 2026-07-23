@@ -3,17 +3,14 @@ import api from '../api-client';
 import type {
   Airport,
   ApiResponse,
+  ListResponse,
 } from '../../types/api';
 
-/**
- * Airport API Service.
- * Real path is /flights/airports (plural, nested under /flights) --
- * was /airport (singular, top-level) before, which doesn't exist.
- */
+
 export const airportsApi = {
-  async getAirports(): Promise<Airport[]> {
-    const response = await api.get<ApiResponse<Airport[]>>('/flights/airports');
-    return response.data.data ?? [];
+  async getAirports(): Promise<ListResponse<Airport>> {
+    const response = await api.get<ApiResponse<ListResponse<Airport>>>('/flights/airports');
+    return response.data.data;
   },
 
   async getAirportById(id: number): Promise<Airport | null> {

@@ -10,6 +10,12 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+
+export interface ListResponse<T> {
+  Items: T[];
+  Total: number;
+}
+
 export interface PaginationMeta {
   page: number;
   limit: number;

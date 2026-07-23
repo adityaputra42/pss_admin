@@ -54,7 +54,7 @@ const PasswordUpdateModal: React.FC<PasswordUpdateModalProps> = ({
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-full p-4 text-center">
             <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
-              <Dialog.Panel className="w-full max-w-md p-6 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+              <Dialog.Panel className="w-full max-w-md p-6 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-md">
                 <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
                   Update Password for {userFullName}
                 </Dialog.Title>
@@ -67,7 +67,7 @@ const PasswordUpdateModal: React.FC<PasswordUpdateModalProps> = ({
                       id="current_password" 
                       type="password" 
                       {...register('current_password')} 
-                      className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500" 
+                      className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500" 
                     />
                     {errors.current_password && <p className="text-sm text-red-500">{errors.current_password.message}</p>}
                   </div>
@@ -79,7 +79,7 @@ const PasswordUpdateModal: React.FC<PasswordUpdateModalProps> = ({
                       id="new_password" 
                       type="password" 
                       {...register('new_password')} 
-                      className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500" 
+                      className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500" 
                     />
                     {errors.new_password && <p className="text-sm text-red-500">{errors.new_password.message}</p>}
                   </div>
@@ -91,7 +91,7 @@ const PasswordUpdateModal: React.FC<PasswordUpdateModalProps> = ({
                       id="confirm_password" 
                       type="password" 
                       {...register('confirm_password')} 
-                      className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500" 
+                      className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500" 
                     />
                     {errors.confirm_password && <p className="text-sm text-red-500">{errors.confirm_password.message}</p>}
                   </div>
@@ -99,13 +99,13 @@ const PasswordUpdateModal: React.FC<PasswordUpdateModalProps> = ({
                     <button 
                       type="button" 
                       onClick={handleClose} 
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
                     >
                       Cancel
                     </button>
                     <button 
                       type="submit" 
-                      className="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-sm hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-teal-500"
                     >
                       Update Password
                     </button>

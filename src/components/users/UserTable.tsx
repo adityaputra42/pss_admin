@@ -36,7 +36,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, onEdit, onToggleStatus }) 
               <tr key={user.id} className="group hover:bg-slate-50/50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm">
+                      <div className="w-10 h-10 rounded overflow-hidden shadow-sm">
                           <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name)}&background=f1f5f9&color=64748b`} alt="" />
                       </div>
                       <div className="flex flex-col">
@@ -68,14 +68,14 @@ const UserTable: React.FC<UserTableProps> = ({ users, onEdit, onToggleStatus }) 
                   <div className="flex items-center justify-end gap-1">
                       <button
                           onClick={() => onEdit(user)}
-                          className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded-lg transition-all"
+                          className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded transition-all"
                           title="Edit User"
                       >
                         <Edit3 className="w-4 h-4" />
                       </button>
                       <button
                           onClick={() => onToggleStatus(user)}
-                          className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all"
+                          className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded transition-all"
                           title={isActive ? 'Lock account' : 'Activate account'}
                       >
                         {isActive ? <PowerOff className="w-4 h-4 text-rose-400" /> : <Power className="w-4 h-4 text-emerald-400" />}

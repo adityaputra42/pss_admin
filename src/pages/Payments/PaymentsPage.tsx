@@ -73,13 +73,13 @@ const PaymentsPage = () => {
         <div className="flex gap-2">
           <button
             onClick={() => setMode('pnr')}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${mode === 'pnr' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'}`}
+            className={`px-4 py-2 rounded text-sm font-bold transition-colors ${mode === 'pnr' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'}`}
           >
             By PNR ID
           </button>
           <button
             onClick={() => setMode('id')}
-            className={`px-4 py-2 rounded-xl text-sm font-bold transition-colors ${mode === 'id' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'}`}
+            className={`px-4 py-2 rounded text-sm font-bold transition-colors ${mode === 'id' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'}`}
           >
             By Payment ID
           </button>
@@ -93,7 +93,7 @@ const PaymentsPage = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={mode === 'pnr' ? 'PNR ID' : 'Payment ID'}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full pl-10 pr-4 py-3 rounded border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
           <button
@@ -111,7 +111,7 @@ const PaymentsPage = () => {
           <div className="premium-card p-8">
             <div className="flex items-start justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                <div className="w-12 h-12 rounded-md bg-primary/10 text-primary flex items-center justify-center">
                   <CreditCard className="w-6 h-6" />
                 </div>
                 <div>
@@ -128,19 +128,19 @@ const PaymentsPage = () => {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-slate-50 rounded-2xl p-4">
+              <div className="bg-slate-50 rounded-md p-4">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Amount</p>
                 <h4 className="text-lg font-bold text-slate-900 mt-2">{payment.Currency} {payment.Amount}</h4>
               </div>
-              <div className="bg-slate-50 rounded-2xl p-4">
+              <div className="bg-slate-50 rounded-md p-4">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Method</p>
                 <h4 className="text-lg font-bold text-slate-900 mt-2">{payment.Method}</h4>
               </div>
-              <div className="bg-slate-50 rounded-2xl p-4">
+              <div className="bg-slate-50 rounded-md p-4">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Paid At</p>
                 <h4 className="text-sm font-bold text-slate-900 mt-2">{payment.PaidAt ?? '-'}</h4>
               </div>
-              <div className="bg-slate-50 rounded-2xl p-4">
+              <div className="bg-slate-50 rounded-md p-4">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Expires At</p>
                 <h4 className="text-sm font-bold text-slate-900 mt-2">{payment.ExpiredAt ?? '-'}</h4>
               </div>

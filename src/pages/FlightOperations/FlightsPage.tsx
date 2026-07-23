@@ -14,19 +14,6 @@ import { showErrorAlert } from '../../utils/alerts';
 
 import { flightsApi, airportsApi } from '../../services/api-services';
 
-/**
- * ⚠️ Backend reality: GET /flights/search is the only flight-listing
- * endpoint with useful route/fare info -- it needs airport IDs (numbers),
- * not IATA codes, so a code text field can't drive it directly (fixed
- * here with an airport dropdown backed by GET /flights/airports).
- * Results are PascalCase (FlightID, not flight_id -- see the type
- * comment in types/api.ts) because of a real backend inconsistency, not
- * a frontend bug.
- *
- * There is NO create/edit/delete/status-change for a single flight
- * instance -- flights only come from generating them off a schedule
- * (Flight Schedules page). Add/Edit/Delete actions removed accordingly.
- */
 const FlightsPage = () => {
   const [flights, setFlights] = useState<FlightSearchResult[]>([]);
   const [airports, setAirports] = useState<Airport[]>([]);
@@ -39,16 +26,31 @@ const FlightsPage = () => {
   const [date, setDate] = useState(
     new Date().toISOString().split('T')[0],
   );
+useEffect(() => {
+  airportsApi.getAirports().then((res) => {
+    console.log("getAirports result:", res);
+    console.log("Array?", Array.isArray(res));
 
-  useEffect(() => {
-    airportsApi.getAirports().then(setAirports).catch(() => {});
-  }, []);
+    setAirports(res.Items);
+  });
+}, []);
 
-  const airportById = useMemo(() => {
-    const map = new Map<number, Airport>();
-    for (const a of airports) map.set(a.id, a);
+
+const airportById = useMemo(() => {
+  console.log(airports);
+
+  const map = new Map<number, Airport>();
+
+  if (!Array.isArray(airports)) {
     return map;
-  }, [airports]);
+  }
+
+  for (const airport of airports) {
+    map.set(airport.id, airport);
+  }
+
+  return map;
+}, [airports]);
 
   const fetchFlights = async () => {
     if (!depId || !arrId || !date) {
@@ -135,7 +137,7 @@ const FlightsPage = () => {
               <select
                 value={depId}
                 onChange={(e) => setDepId(e.target.value ? Number(e.target.value) : '')}
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none bg-white"
+                className="w-full pl-10 pr-4 py-3 rounded border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none bg-white"
               >
                 <option value="">Select airport</option>
                 {airports.map((a) => (
@@ -154,7 +156,7 @@ const FlightsPage = () => {
               <select
                 value={arrId}
                 onChange={(e) => setArrId(e.target.value ? Number(e.target.value) : '')}
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none bg-white"
+                className="w-full pl-10 pr-4 py-3 rounded border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none bg-white"
               >
                 <option value="">Select airport</option>
                 {airports.map((a) => (
@@ -174,7 +176,7 @@ const FlightsPage = () => {
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className="w-full pl-10 pr-4 py-3 rounded border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
           </div>
@@ -182,7 +184,7 @@ const FlightsPage = () => {
           <div className="flex items-end">
             <button
               onClick={fetchFlights}
-              className="w-full bg-primary hover:bg-secondary text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all"
+              className="w-full bg-primary hover:bg-secondary text-white py-3 rounded font-semibold flex items-center justify-center gap-2 transition-all"
             >
               <Search className="w-4 h-4" />
               Search Flights
@@ -221,7 +223,7 @@ const FlightsPage = () => {
             </div>
           ) : flights.length === 0 ? (
             <div className="p-20 text-center">
-              <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-md flex items-center justify-center mx-auto mb-4">
                 <Plane className="w-8 h-8" />
               </div>
               <p className="text-slate-500 font-medium">No flights found</p>

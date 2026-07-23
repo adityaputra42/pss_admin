@@ -62,7 +62,7 @@ const DashboardPage = () => {
   if (error) {
     return (
       <div className="premium-card p-12 text-center">
-        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-md flex items-center justify-center mx-auto mb-4">
           <AlertTriangle className="w-8 h-8" />
         </div>
 
@@ -91,7 +91,7 @@ const DashboardPage = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <select className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-sm font-medium text-slate-600 focus:outline-none">
+          <select className="bg-white border border-slate-200 rounded px-4 py-2 text-sm font-medium text-slate-600 focus:outline-none">
             <option>Today</option>
             <option>Last 7 Days</option>
             <option>Last 30 Days</option>
@@ -369,7 +369,7 @@ const DashboardPage = () => {
             {recentBookings.map((booking) => (
               <div
                 key={booking.id}
-                className="flex items-center justify-between p-4 rounded-2xl border border-slate-100 hover:bg-slate-50 transition-colors"
+                className="flex items-center justify-between p-4 rounded-md border border-slate-100 hover:bg-slate-50 transition-colors"
               >
                 <div>
                   <p className="font-semibold text-slate-900">
@@ -411,9 +411,9 @@ const DashboardPage = () => {
             {alerts.map((alert) => (
               <div
                 key={alert.id}
-                className="flex items-start gap-4 p-4 rounded-2xl bg-amber-50 border border-amber-100"
+                className="flex items-start gap-4 p-4 rounded-md bg-amber-50 border border-amber-100"
               >
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center">
+                <div className="w-10 h-10 rounded bg-white flex items-center justify-center">
                   <AlertTriangle className="w-5 h-5 text-amber-500" />
                 </div>
 

@@ -54,14 +54,14 @@ const BoardingPassPage = () => {
             placeholder="Passenger ID"
             value={passengerId}
             onChange={(e) => setPassengerId(e.target.value)}
-            className="flex-1 bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+            className="flex-1 bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
           />
           <input
             type="number"
             placeholder="Segment ID"
             value={segmentId}
             onChange={(e) => setSegmentId(e.target.value)}
-            className="flex-1 bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+            className="flex-1 bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
           />
           <button
             onClick={handleLookup}
@@ -78,7 +78,7 @@ const BoardingPassPage = () => {
         pass ? (
           <div className="premium-card p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+              <div className="w-12 h-12 rounded-md bg-primary/10 text-primary flex items-center justify-center">
                 <Armchair className="w-6 h-6" />
               </div>
               <div>
@@ -87,19 +87,19 @@ const BoardingPassPage = () => {
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-slate-50 rounded-2xl p-4">
+              <div className="bg-slate-50 rounded-md p-4">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</p>
                 <h4 className="text-lg font-bold text-slate-900 mt-2">{pass.Status}</h4>
               </div>
-              <div className="bg-slate-50 rounded-2xl p-4">
+              <div className="bg-slate-50 rounded-md p-4">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Boarding Time</p>
                 <h4 className="text-lg font-bold text-slate-900 mt-2">{pass.BoardingTime ?? '-'}</h4>
               </div>
-              <div className="bg-slate-50 rounded-2xl p-4">
+              <div className="bg-slate-50 rounded-md p-4">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Baggage Count</p>
                 <h4 className="text-lg font-bold text-slate-900 mt-2">{pass.BaggageCount}</h4>
               </div>
-              <div className="bg-slate-50 rounded-2xl p-4">
+              <div className="bg-slate-50 rounded-md p-4">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Checked In At</p>
                 <h4 className="text-sm font-bold text-slate-900 mt-2">{pass.CheckedInAt}</h4>
               </div>

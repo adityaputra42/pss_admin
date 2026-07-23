@@ -15,7 +15,7 @@
 //       className="
 //         px-4
 //         py-2
-//         rounded-xl
+//         rounded
 //         bg-black
 //         text-white
 //       "

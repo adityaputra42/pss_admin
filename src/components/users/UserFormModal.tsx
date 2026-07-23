@@ -113,7 +113,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-95"
             >
-              <Dialog.Panel className="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+              <Dialog.Panel className="w-full max-w-md rounded-md bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
                 <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                     <div>
                         <Dialog.Title className="text-xl font-bold text-slate-900">
@@ -121,7 +121,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                         </Dialog.Title>
                         <p className="text-xs text-slate-500 font-medium">Configure administrative access details.</p>
                     </div>
-                    <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-900 hover:bg-white rounded-xl transition-all">
+                    <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-900 hover:bg-white rounded transition-all">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
@@ -129,7 +129,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                 <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
                     <div className="space-y-1.5 focus-within:text-primary transition-colors">
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
-                        <input {...register('full_name')} className="w-full bg-slate-50 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-medium" />
+                        <input {...register('full_name')} className="w-full bg-slate-50 border-none rounded py-3 px-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-medium" />
                         {errors.full_name && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.full_name.message}</p>}
                     </div>
 
@@ -137,7 +137,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                         <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
                         <div className="relative">
                             <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <input type="email" {...register('email')} className="w-full bg-slate-50 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all" />
+                            <input type="email" {...register('email')} className="w-full bg-slate-50 border-none rounded py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all" />
                         </div>
                         {errors.email && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.email.message}</p>}
                     </div>
@@ -148,7 +148,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Username</label>
                             <div className="relative">
                                 <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                <input {...register('username')} className="w-full bg-slate-50 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-semibold" />
+                                <input {...register('username')} className="w-full bg-slate-50 border-none rounded py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-semibold" />
                             </div>
                             {errors.username && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.username.message}</p>}
                         </div>
@@ -157,7 +157,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Initial Password</label>
                             <div className="relative">
                                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                <input type="password" {...register('password')} className="w-full bg-slate-50 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all" />
+                                <input type="password" {...register('password')} className="w-full bg-slate-50 border-none rounded py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all" />
                             </div>
                             {errors.password && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.password.message}</p>}
                         </div>
@@ -168,7 +168,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                             </label>
                             <div className="relative">
                                 <Shield className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                <input type="number" {...register('role_id', { valueAsNumber: true })} className="w-full bg-slate-50 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-bold" />
+                                <input type="number" {...register('role_id', { valueAsNumber: true })} className="w-full bg-slate-50 border-none rounded py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-bold" />
                             </div>
                             {errors.role_id && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.role_id.message}</p>}
                         </div>
@@ -176,7 +176,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                     )}
 
                     <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-50">
-                        <button type="button" onClick={onClose} className="px-6 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">
+                        <button type="button" onClick={onClose} className="px-6 py-2.5 rounded text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">
                             Cancel
                         </button>
                         <button type="submit" disabled={isSubmitting} className="premium-button bg-primary text-white hover:bg-secondary shadow-lg shadow-teal-100 disabled:opacity-50">

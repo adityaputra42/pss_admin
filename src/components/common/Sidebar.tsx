@@ -17,6 +17,8 @@ import {
   FileText,
   Bell,
   Settings,
+  ChevronsLeft,
+  ChevronsRight,
 } from 'lucide-react';
 
 import { useState } from 'react';
@@ -148,6 +150,7 @@ const navigation = [
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
     <>
@@ -158,11 +161,11 @@ const Sidebar = () => {
           onClick={() => setIsOpen(!isOpen)}
           className="
             p-2.5
-            rounded-xl
+            rounded
             bg-primary
             text-white
             shadow-lg
-            shadow-teal-200/50
+            shadow-primary/30
           "
         >
           {isOpen ? (
@@ -195,23 +198,29 @@ const Sidebar = () => {
       </AnimatePresence>
 
       {/* DESKTOP SIDEBAR */}
-      <aside
+      <motion.aside
+        animate={{ width: isCollapsed ? 80 : 288 }}
+        transition={{ duration: 0.2, ease: 'easeInOut' }}
         className="
           hidden
           md:flex
-          md:w-72
-          md:min-w-72
           h-screen
           sticky
           top-0
-          bg-white
+          bg-primary
           border-r
-          border-slate-100
+          border-black/10
           flex-col
+          shrink-0
+          overflow-hidden
         "
       >
-        <SidebarContent setIsOpen={setIsOpen} />
-      </aside>
+        <SidebarContent
+          setIsOpen={setIsOpen}
+          isCollapsed={isCollapsed}
+          onToggleCollapsed={() => setIsCollapsed((v) => !v)}
+        />
+      </motion.aside>
 
       {/* MOBILE SIDEBAR */}
       <AnimatePresence>
@@ -224,16 +233,16 @@ const Sidebar = () => {
               left-0
               z-50
               w-72
-              bg-white
+              bg-primary
               border-r
-              border-slate-100
+              border-black/10
               flex
               flex-col
               md:hidden
               h-screen
             "
           >
-            <SidebarContent setIsOpen={setIsOpen} />
+            <SidebarContent setIsOpen={setIsOpen} isCollapsed={false} />
           </Slide>
         )}
       </AnimatePresence>
@@ -243,77 +252,116 @@ const Sidebar = () => {
 
 type SidebarContentProps = {
   setIsOpen: (value: boolean) => void;
+  isCollapsed: boolean;
+  onToggleCollapsed?: () => void;
 };
 
 const SidebarContent = ({
   setIsOpen,
+  isCollapsed,
+  onToggleCollapsed,
 }: SidebarContentProps) => {
   return (
     <>
       {/* HEADER */}
-      <div className="p-6 border-b border-slate-100">
+      <div className="p-6 border-b border-white/10">
         <Slide direction="down">
-          <div className="flex items-center gap-3">
+          <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
             <div
               className="
                 w-11
                 h-11
-                rounded-2xl
-                bg-primary
+                rounded
+                bg-white/15
                 flex
                 items-center
                 justify-center
-                shadow-lg
-                shadow-teal-200/50
+                shrink-0
               "
             >
               <Plane className="text-white w-6 h-6" />
             </div>
 
-            <div>
-              <h1 className="text-lg font-bold text-slate-900 leading-tight">
-                Passenger Service
-              </h1>
+            {!isCollapsed && (
+              <div className="min-w-0">
+                <h1 className="text-lg font-bold text-white leading-tight truncate">
+                  Passenger Service
+                </h1>
 
-              <p
-                className="
-                  text-[11px]
-                  uppercase
-                  tracking-[0.2em]
-                  text-slate-400
-                  font-semibold
-                "
-              >
-                Admin Panel
-              </p>
-            </div>
+                <p
+                  className="
+                    text-[11px]
+                    uppercase
+                    tracking-[0.2em]
+                    text-white/60
+                    font-semibold
+                  "
+                >
+                  Admin Panel
+                </p>
+              </div>
+            )}
           </div>
         </Slide>
+
+        {onToggleCollapsed && (
+          <button
+            onClick={onToggleCollapsed}
+            title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="
+              mt-4
+              w-full
+              flex
+              items-center
+              justify-center
+              gap-2
+              py-2
+              rounded
+              text-white/70
+              hover:bg-white/10
+              hover:text-white
+              transition-colors
+              text-xs
+              font-semibold
+            "
+          >
+            {isCollapsed ? (
+              <ChevronsRight className="w-4 h-4" />
+            ) : (
+              <>
+                <ChevronsLeft className="w-4 h-4" />
+                <span>Collapse</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       {/* NAVIGATION */}
-      <nav className="flex-1 overflow-y-auto px-4 py-5 custom-scrollbar">
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-5 custom-scrollbar">
         <div className="space-y-6">
           {navigation.map((group, groupIndex) => (
             <div key={group.section}>
-              <Slide
-                direction="right"
-                delay={groupIndex * 0.04}
-              >
-                <p
-                  className="
-                    px-3
-                    mb-2
-                    text-[11px]
-                    font-bold
-                    uppercase
-                    tracking-[0.2em]
-                    text-slate-400
-                  "
+              {!isCollapsed && (
+                <Slide
+                  direction="right"
+                  delay={groupIndex * 0.04}
                 >
-                  {group.section}
-                </p>
-              </Slide>
+                  <p
+                    className="
+                      px-3
+                      mb-2
+                      text-[11px]
+                      font-bold
+                      uppercase
+                      tracking-[0.2em]
+                      text-white/50
+                    "
+                  >
+                    {group.section}
+                  </p>
+                </Slide>
+              )}
 
               <ul className="space-y-1.5">
                 {group.items.map((item, index) => (
@@ -323,35 +371,38 @@ const SidebarContent = ({
                       delay={index * 0.04}
                     >
                       <motion.div
-                        whileHover={{ x: 4 }}
+                        whileHover={{ x: isCollapsed ? 0 : 4 }}
                         whileTap={{ scale: 0.98 }}
                       >
                         <NavLink
                           to={item.href}
                           onClick={() => setIsOpen(false)}
+                          title={isCollapsed ? item.name : undefined}
                           className={({ isActive }) =>
                             `
                               flex
                               items-center
-                              px-4
+                              ${isCollapsed ? 'justify-center px-0' : 'px-4'}
                               py-3
-                              rounded-xl
+                              rounded
                               transition-colors
                               duration-200
                               group
                               ${
                                 isActive
-                                  ? 'bg-teal-50 text-primary font-semibold shadow-sm'
-                                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                                  ? 'bg-white text-primary font-semibold shadow-sm'
+                                  : 'text-white/70 hover:bg-white/10 hover:text-white'
                               }
                             `
                           }
                         >
-                          <item.icon className="w-5 h-5 mr-3 shrink-0" />
+                          <item.icon className={`w-5 h-5 shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
 
-                          <span className="text-sm">
-                            {item.name}
-                          </span>
+                          {!isCollapsed && (
+                            <span className="text-sm">
+                              {item.name}
+                            </span>
+                          )}
                         </NavLink>
                       </motion.div>
                     </Slide>
@@ -364,56 +415,59 @@ const SidebarContent = ({
       </nav>
 
       {/* FOOTER */}
-      <div className="p-4 border-t border-slate-100">
+      <div className="p-4 border-t border-white/10">
         <Slide direction="up" delay={0.2}>
           <motion.div
             whileHover={{ y: -2 }}
-            className="
+            className={`
               p-3
-              rounded-2xl
-              bg-slate-50
+              rounded
+              bg-white/10
               flex
               items-center
               gap-3
-              hover:bg-slate-100
+              hover:bg-white/15
               transition-colors
               cursor-pointer
-            "
+              ${isCollapsed ? 'justify-center' : ''}
+            `}
           >
             <div
               className="
                 w-10
                 h-10
-                rounded-xl
+                rounded-full
                 overflow-hidden
                 ring-2
-                ring-white
-                shadow-sm
+                ring-white/30
+                shrink-0
               "
             >
               <img
-                src="https://ui-avatars.com/api/?name=PSS&background=0f172a&color=fff"
+                src="https://ui-avatars.com/api/?name=PSS&background=ffffff&color=2664FA"
                 alt="PSS"
               />
             </div>
 
-            <div className="flex-1 overflow-hidden">
-              <p className="text-sm font-semibold text-slate-900 truncate">
-                Passenger Service
-              </p>
+            {!isCollapsed && (
+              <div className="flex-1 overflow-hidden">
+                <p className="text-sm font-semibold text-white truncate">
+                  Passenger Service
+                </p>
 
-              <p
-                className="
-                  text-[10px]
-                  uppercase
-                  tracking-wider
-                  text-slate-500
-                  font-bold
-                "
-              >
-                System Administrator
-              </p>
-            </div>
+                <p
+                  className="
+                    text-[10px]
+                    uppercase
+                    tracking-wider
+                    text-white/60
+                    font-bold
+                  "
+                >
+                  System Administrator
+                </p>
+              </div>
+            )}
           </motion.div>
         </Slide>
       </div>

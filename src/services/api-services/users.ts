@@ -7,6 +7,25 @@ import type {
   ApiResponse,
 } from '../../types/api';
 
+/**
+ * Users API Service — Passenger Service System Admin User Management.
+ *
+ * ⚠️ BACKEND REALITY CHECK (internal/auth/interfaces/http/router.go):
+ * the auth module only exposes FOUR user-management endpoints, total:
+ *   POST   /auth/register           (permission: user.account.create)
+ *   PUT    /auth/users/{id}         (permission: user.account.update)
+ *   PATCH  /auth/users/{id}/status  (permission: user.account.status)
+ *   PUT    /auth/me                 (self-service, any authenticated user)
+ *
+ * There is NO GET /users (list), NO GET /users/{id}, NO DELETE /users/{id},
+ * NO /users/{id}/activate|deactivate (status changes go through the one
+ * generic /status endpoint with a status string), NO /users/bulk, and NO
+ * /profile or /profile/password endpoints at all. A user list/detail page
+ * cannot be built against this backend today without new read endpoints
+ * being added there first -- this file does NOT paper over that with fake
+ * data; functions with no backend counterpart are removed below, not kept
+ * pointing at a 404.
+ */
 export const usersApi = {
   /**
    * Create user.

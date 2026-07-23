@@ -26,7 +26,7 @@ export const StatCard = ({
 }: StatCardProps) => (
   <div className="premium-card p-6 flex items-center gap-6">
     <div className={clsx(
-        "w-14 h-14 rounded-2xl flex items-center justify-center ring-4 transition-transform group-hover:scale-110",
+        "w-14 h-14 rounded-md flex items-center justify-center ring-4 transition-transform group-hover:scale-110",
         colorMap[color]
     )}>
       {icon}

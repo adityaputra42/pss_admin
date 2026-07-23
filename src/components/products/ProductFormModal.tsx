@@ -224,7 +224,7 @@
 //                     leaveFrom="opacity-100 scale-100"
 //                     leaveTo="opacity-95"
 //                 >
-//                     <DialogPanel className="w-full max-w-4xl rounded-2xl md:rounded-3xl bg-white shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+//                     <DialogPanel className="w-full max-w-4xl rounded-md md:rounded-md bg-white shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
 //                         <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
 //                             <div>
 //                                 <DialogTitle className="text-xl font-bold text-slate-900">
@@ -232,7 +232,7 @@
 //                                 </DialogTitle>
 //                                 <p className="text-xs text-slate-500 font-medium">Fill in the details below to save your product.</p>
 //                             </div>
-//                             <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-900 hover:bg-white rounded-xl transition-all">
+//                             <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-900 hover:bg-white rounded transition-all">
 //                                 <X className="w-5 h-5" />
 //                             </button>
 //                         </div>
@@ -247,13 +247,13 @@
 //                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 //                                     <div className="lg:col-span-2 space-y-1.5 focus-within:text-primary transition-colors">
 //                                         <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Product Name</label>
-//                                         <input {...register('name')} placeholder="e.g. Premium Cotton T-Shirt" className="w-full bg-slate-50 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-medium" />
+//                                         <input {...register('name')} placeholder="e.g. Premium Cotton T-Shirt" className="w-full bg-slate-50 border-none rounded py-3 px-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-medium" />
 //                                         {errors.name && <p className="text-rose-500 text-xs mt-1 font-medium">{errors.name.message}</p>}
 //                                     </div>
 
 //                                     <div className="space-y-1.5 focus-within:text-primary transition-colors">
 //                                         <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Category</label>
-//                                         <select {...register('category_id', { valueAsNumber: true })} className="w-full bg-slate-50 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-medium appearance-none">
+//                                         <select {...register('category_id', { valueAsNumber: true })} className="w-full bg-slate-50 border-none rounded py-3 px-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-medium appearance-none">
 //                                             <option value="">Select Category</option>
 //                                             {categories.map(c => (
 //                                                 <option key={c.id} value={c.id}>{c.name}</option>
@@ -264,14 +264,14 @@
 
 //                                     <div className="space-y-1.5 focus-within:text-primary transition-colors">
 //                                         <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Price (IDR)</label>
-//                                         <input type="number" {...register('price', { valueAsNumber: true })} placeholder="0" className="w-full bg-slate-50 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-bold" />
+//                                         <input type="number" {...register('price', { valueAsNumber: true })} placeholder="0" className="w-full bg-slate-50 border-none rounded py-3 px-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-bold" />
 //                                         {errors.price && <p className="text-rose-500 text-xs mt-1 font-medium">{errors.price.message}</p>}
 //                                     </div>
 
 //                                     <div className="lg:col-span-2 space-y-1.5">
 //                                         <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Featured Image</label>
-//                                         <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-//                                             <div className="w-16 h-16 rounded-xl bg-white border border-slate-100 overflow-hidden shrink-0 shadow-sm">
+//                                         <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-md border border-dashed border-slate-200">
+//                                             <div className="w-16 h-16 rounded bg-white border border-slate-100 overflow-hidden shrink-0 shadow-sm">
 //                                                 {mainImagePreview ? (
 //                                                      <img src={mainImagePreview} alt="Preview" className="w-full h-full object-cover" />
 //                                                 ) : (
@@ -280,13 +280,13 @@
 //                                                     </div>
 //                                                 )}
 //                                             </div>
-//                                             <input type="file" accept="image/*" {...register('image')} className="text-xs font-medium text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-teal-50 file:text-primary hover:file:bg-teal-100 transition-all cursor-pointer w-full" />
+//                                             <input type="file" accept="image/*" {...register('image')} className="text-xs font-medium text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-bold file:bg-teal-50 file:text-primary hover:file:bg-teal-100 transition-all cursor-pointer w-full" />
 //                                         </div>
 //                                     </div>
 
 //                                     <div className="col-span-1 md:col-span-2 lg:col-span-3 space-y-1.5">
 //                                         <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Description</label>
-//                                         <textarea {...register('description')} placeholder="Describe your product in detail..." className="w-full bg-slate-50 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-medium" rows={3} />
+//                                         <textarea {...register('description')} placeholder="Describe your product in detail..." className="w-full bg-slate-50 border-none rounded py-3 px-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-medium" rows={3} />
 //                                     </div>
 //                                 </div>
 //                             </div>
@@ -304,41 +304,41 @@
 
 //                                 <div className="space-y-6">
 //                                     {fields.map((field, index) => (
-//                                         <div key={field.id} className="p-4 md:p-6 bg-slate-50/50 rounded-2xl border border-slate-100 relative group animate-in fade-in slide-in-from-top-2">
-//                                             <button type="button" onClick={() => remove(index)} className="absolute top-4 right-4 p-1.5 bg-white text-slate-400 hover:text-rose-500 rounded-lg shadow-sm transition-all opacity-0 group-hover:opacity-100 hover:scale-110">
+//                                         <div key={field.id} className="p-4 md:p-6 bg-slate-50/50 rounded-md border border-slate-100 relative group animate-in fade-in slide-in-from-top-2">
+//                                             <button type="button" onClick={() => remove(index)} className="absolute top-4 right-4 p-1.5 bg-white text-slate-400 hover:text-rose-500 rounded shadow-sm transition-all opacity-0 group-hover:opacity-100 hover:scale-110">
 //                                                 <X className="w-4 h-4"/>
 //                                             </button>
 
 //                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
 //                                                 <div className="space-y-1">
 //                                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Color Name</label>
-//                                                     <input {...register(`color_varians.${index}.name` as const)} placeholder="e.g. Jet Black" className="w-full bg-white border border-slate-100 rounded-lg py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none" />
+//                                                     <input {...register(`color_varians.${index}.name` as const)} placeholder="e.g. Jet Black" className="w-full bg-white border border-slate-100 rounded py-2 px-3 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none" />
 //                                                 </div>
 //                                                 <div className="space-y-1">
 //                                                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Hex Code</label>
 //                                                      <div className="relative">
 //                                                         <div className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full border border-slate-200" style={{ backgroundColor: watch(`color_varians.${index}.color`) || '#fff' }}></div>
-//                                                         <input {...register(`color_varians.${index}.color` as const)} placeholder="#000000" className="w-full bg-white border border-slate-100 rounded-lg py-2 pl-8 pr-3 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none font-mono" />
+//                                                         <input {...register(`color_varians.${index}.color` as const)} placeholder="#000000" className="w-full bg-white border border-slate-100 rounded py-2 pl-8 pr-3 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none font-mono" />
 //                                                      </div>
 //                                                 </div>
 //                                                 <div className="space-y-1">
 //                                                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Variant Image</label>
 //                                                     <div className="flex items-center gap-3">
-//                                                         <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 overflow-hidden shrink-0">
+//                                                         <div className="w-10 h-10 rounded bg-white border border-slate-200 overflow-hidden shrink-0">
 //                                                              <VariantImagePreview file={watch(`color_varians.${index}.image`)} existingUrl={field.preview} />
 //                                                         </div>
-//                                                         <input type="file" accept="image/*" {...register(`color_varians.${index}.image` as const)} className="text-[10px] font-medium text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-slate-100 file:text-slate-600 hover:file:bg-slate-200 w-full" />
+//                                                         <input type="file" accept="image/*" {...register(`color_varians.${index}.image` as const)} className="text-[10px] font-medium text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-slate-100 file:text-slate-600 hover:file:bg-slate-200 w-full" />
 //                                                     </div>
 //                                                 </div>
 //                                             </div>
 
-//                                             <div className="bg-white/60 p-4 rounded-xl border border-slate-50 shadow-sm transition-all focus-within:bg-white focus-within:shadow-teal-100/20">
+//                                             <div className="bg-white/60 p-4 rounded border border-slate-50 shadow-sm transition-all focus-within:bg-white focus-within:shadow-teal-100/20">
 //                                                <SizesFieldArray nestIndex={index} control={control} register={register} errors={errors} />
 //                                             </div>
 //                                         </div>
 //                                     ))}
 //                                     {fields.length === 0 && (
-//                                         <div className="p-12 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+//                                         <div className="p-12 text-center bg-slate-50/50 rounded-md border border-dashed border-slate-200">
 //                                             <p className="text-sm text-slate-400 italic">No variants added. Click "New Variant" to start adding colors and sizes.</p>
 //                                         </div>
 //                                     )}
@@ -347,7 +347,7 @@
 //                         </form>
 
 //                         <div className="p-4 md:p-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-end gap-3 shrink-0">
-//                             <button type="button" onClick={onClose} className="px-6 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">
+//                             <button type="button" onClick={onClose} className="px-6 py-2.5 rounded text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">
 //                                 Cancel
 //                             </button>
 //                             <button
@@ -377,7 +377,7 @@
 //         <label className="text-[10px] font-bold text-teal-400 uppercase tracking-tighter ml-1">Sizes & Availability</label>
 //         <div className="flex flex-wrap gap-3">
 //             {fields.map((item, k) => (
-//                  <div key={item.id} className="flex gap-2 items-center bg-white p-2 border border-slate-100 rounded-lg shadow-sm animate-in zoom-in-95 duration-200">
+//                  <div key={item.id} className="flex gap-2 items-center bg-white p-2 border border-slate-100 rounded shadow-sm animate-in zoom-in-95 duration-200">
 //                     <div className="space-y-0.5">
 //                        <input {...register(`color_varians.${nestIndex}.sizes.${k}.size` as const)} placeholder="Size" className="w-16 border-none p-0 text-xs font-bold text-slate-700 placeholder:text-slate-300 focus:ring-0" />
 //                     </div>
@@ -393,7 +393,7 @@
 //              <button
 //                 type="button"
 //                 onClick={() => append({ size: '', stock: 0 })}
-//                 className="flex items-center gap-1.5 px-3 py-2 bg-teal-50 border border-teal-100 text-primary rounded-lg text-[10px] font-bold uppercase transition-all hover:bg-teal-100 active:scale-95"
+//                 className="flex items-center gap-1.5 px-3 py-2 bg-teal-50 border border-teal-100 text-primary rounded text-[10px] font-bold uppercase transition-all hover:bg-teal-100 active:scale-95"
 //              >
 //                  <Plus className="w-3 h-3" /> Add Size
 //              </button>

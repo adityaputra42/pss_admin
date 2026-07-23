@@ -94,7 +94,7 @@ const AirportPage = () => {
             placeholder="Search airport code, city, country..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-50 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none"
+            className="w-full bg-slate-50 border-none rounded py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none"
           />
         </div>
 
@@ -116,7 +116,7 @@ const AirportPage = () => {
           </div>
         ) : filteredAirports.length === 0 ? (
           <div className="p-20 text-center">
-            <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-md flex items-center justify-center mx-auto mb-4">
               <MapPin className="w-8 h-8" />
             </div>
 
@@ -159,7 +159,7 @@ const AirportPage = () => {
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-bold">
+                        <div className="w-12 h-12 rounded-md bg-primary/10 flex items-center justify-center text-primary font-bold">
                           {airport.code}
                         </div>
 
@@ -189,13 +189,13 @@ const AirportPage = () => {
 
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded-lg transition-all">
+                        <button className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded transition-all">
                           <Edit3 className="w-4 h-4" />
                         </button>
 
                         <button
                           onClick={() => handleDelete(airport)}
-                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                          className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

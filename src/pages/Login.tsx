@@ -54,12 +54,12 @@ const LoginPage = () => {
            </p>
 
            <div className="grid grid-cols-2 gap-6">
-              <div className="p-6 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 text-left">
+              <div className="p-6 bg-white/5 backdrop-blur-sm rounded-md border border-white/10 text-left">
                  <ShieldCheck className="w-8 h-8 text-teal-300 mb-4" />
                  <h3 className="text-white font-bold mb-1">Secure</h3>
                  <p className="text-teal-200/60 text-xs">Military-grade protection for your data.</p>
               </div>
-              <div className="p-6 bg-white/5 backdrop-blur-sm rounded-3xl border border-white/10 text-left">
+              <div className="p-6 bg-white/5 backdrop-blur-sm rounded-md border border-white/10 text-left">
                  <LayoutDashboard className="w-8 h-8 text-teal-300 mb-4" />
                  <h3 className="text-white font-bold mb-1">Intuitive</h3>
                  <p className="text-teal-200/60 text-xs">Built for speed and ease of use.</p>
@@ -76,7 +76,7 @@ const LoginPage = () => {
 
         <div className="w-full max-w-md space-y-10   duration-700">
           <div className="text-center lg:text-left">
-            <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-2xl shadow-teal-200 mx-auto lg:mx-0 mb-6 group hover:rotate-6 transition-transform">
+            <div className="w-16 h-16 bg-primary rounded-md flex items-center justify-center shadow-2xl shadow-teal-200 mx-auto lg:mx-0 mb-6 group hover:rotate-6 transition-transform">
                <Lock className="text-white w-8 h-8" />
             </div>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">Welcome back!</h2>
@@ -91,7 +91,7 @@ const LoginPage = () => {
                 <input
                   type="text"
                   required
-                  className="w-full bg-white border-2 border-slate-100 rounded-2xl py-4 pl-12 pr-4 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-semibold"
+                  className="w-full bg-white border-2 border-slate-100 rounded-md py-4 pl-12 pr-4 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-semibold"
                   placeholder="admin_core"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -109,7 +109,7 @@ const LoginPage = () => {
                 <input
                   type="password"
                   required
-                  className="w-full bg-white border-2 border-slate-100 rounded-2xl py-4 pl-12 pr-4 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-semibold"
+                  className="w-full bg-white border-2 border-slate-100 rounded-md py-4 pl-12 pr-4 text-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all font-semibold"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -118,7 +118,7 @@ const LoginPage = () => {
             </div>
 
             {error && (
-              <div className="bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-xl text-xs font-bold flex items-center gap-3 ">
+              <div className="bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded text-xs font-bold flex items-center gap-3 ">
                  <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></div>
                  {error}
               </div>
@@ -127,7 +127,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary text-white rounded-2xl py-4 font-bold shadow-xl shadow-teal-100 hover:bg-secondary hover:shadow-teal-200 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 group"
+              className="w-full bg-primary text-white rounded-md py-4 font-bold shadow-xl shadow-teal-100 hover:bg-secondary hover:shadow-teal-200 active:scale-[0.98] transition-all disabled:opacity-50 flex items-center justify-center gap-2 group"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

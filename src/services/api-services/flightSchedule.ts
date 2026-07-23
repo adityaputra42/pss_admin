@@ -1,19 +1,30 @@
+/* =========================================================
+   FLIGHT SCHEDULE SERVICE
+   Real endpoints, all nested under /flights (NOT top-level /schedules
+   or /flight-schedules -- both wrong before, and inconsistent with each
+   other in the old file).
+========================================================= */
 
 import type {
   ApiResponse,
   FlightSchedule,
+  ListResponse,
 } from '../../types/api';
 import api from '../api-client';
 
 export const flightSchedulesApi = {
-
+  /**
+   * GET /flights/schedules?page=&limit=&departure_airport_id=&arrival_airport_id=
+   * Real response is paginated: { items: [...], total: N } -- NOT a bare
+   * array. This function unwraps .items for callers.
+   */
   async getSchedules(params?: {
     page?: number;
     limit?: number;
     departureAirportId?: number;
     arrivalAirportId?: number;
-  }): Promise<FlightSchedule[]> {
-    const response = await api.get<ApiResponse<{ items: FlightSchedule[]; total: number }>>(
+  }): Promise<ListResponse<FlightSchedule>> {
+    const response = await api.get<ApiResponse<ListResponse<FlightSchedule>>>(
       '/flights/schedules',
       {
         params: {
@@ -24,7 +35,7 @@ export const flightSchedulesApi = {
         },
       },
     );
-    return response.data.data?.items ?? [];
+    return response.data.data;
   },
 
   /** GET /flights/schedules/{id} */
@@ -33,6 +44,13 @@ export const flightSchedulesApi = {
     return response.data.data;
   },
 
+  /**
+   * POST /flights/schedules
+   * Body: { flight_number, departure_airport_id, arrival_airport_id,
+   *         departure_time: "HH:MM", arrival_time: "HH:MM",
+   *         operating_days } -- operating_days is a bitmask (int16), NOT
+   * a string/array of day names.
+   */
   async createSchedule(payload: {
     flight_number: string;
     departure_airport_id: number;
@@ -45,6 +63,12 @@ export const flightSchedulesApi = {
     return response.data.data;
   },
 
+  /**
+   * PUT /flights/schedules/{id}
+   * Only departure_time/arrival_time/operating_days are editable --
+   * flight_number and the two airport ids are NOT (create a new schedule
+   * instead if the route itself changes).
+   */
   async updateSchedule(
     id: number,
     payload: Partial<{

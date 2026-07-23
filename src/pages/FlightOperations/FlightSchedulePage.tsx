@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Airport, FlightSchedule } from '../../types/api';
+import type { Airport, FlightSchedule, ListResponse } from '../../types/api';
 
 import {
   Calendar,
@@ -23,18 +23,13 @@ import { flightSchedulesApi, airportsApi } from '../../services/api-services';
 
 const FlightSchedulesPage = () => {
   const [schedules, setSchedules] = useState<FlightSchedule[]>([]);
-  const [airports, setAirports] = useState<Airport[]>([]);
+  const [airports, setAirports] = useState<ListResponse<Airport>>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   // filter
   const [search, setSearch] = useState('');
 
-  // modal
-  // Read side (isModalOpen/editingSchedule) isn't used yet -- the
-  // FlightScheduleFormModal below is commented out pending that
-  // component being built. Setters are kept so handleAddSchedule/
-  // handleEditSchedule stay ready to wire up.
   const [, setIsModalOpen] = useState(false);
   const [, setEditingSchedule] =
     useState<FlightSchedule | null>(null);
@@ -44,14 +39,11 @@ const FlightSchedulesPage = () => {
     airportsApi.getAirports().then(setAirports).catch(() => {});
   }, []);
 
-  // /flights/schedules doesn't return joined airport data (only
-  // departure_airport_id/arrival_airport_id) -- resolve names client-side
-  // against the airports list fetched above.
   const airportById = useMemo(() => {
     const map = new Map<number, Airport>();
-    for (const a of airports) map.set(a.id, a);
+    for (const a of airports?.Items??[]) map.set(a.id, a);
     return map;
-  }, [airports]);
+  }, [airports?.Items]);
 
   const fetchSchedules = async () => {
     setIsLoading(true);
@@ -181,7 +173,7 @@ const FlightSchedulesPage = () => {
               onChange={(e) =>
                 setSearch(e.target.value)
               }
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full pl-10 pr-4 py-3 rounded border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
@@ -211,7 +203,7 @@ const FlightSchedulesPage = () => {
           </div>
         ) : error ? (
           <div className="p-20 text-center">
-            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-md flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-8 h-8" />
             </div>
 
@@ -228,7 +220,7 @@ const FlightSchedulesPage = () => {
           </div>
         ) : filteredSchedules.length === 0 ? (
           <div className="p-20 text-center">
-            <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-md flex items-center justify-center mx-auto mb-4">
               <Calendar className="w-8 h-8" />
             </div>
 
@@ -279,7 +271,7 @@ const FlightSchedulesPage = () => {
                     {/* flight */}
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                        <div className="w-11 h-11 rounded bg-primary/10 text-primary flex items-center justify-center">
                           <Plane className="w-5 h-5" />
                         </div>
 
@@ -352,7 +344,7 @@ const FlightSchedulesPage = () => {
                         {schedule.operating_days_labels.map((day) => (
                             <span
                               key={day}
-                              className="px-2 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold"
+                              className="px-2 py-1 rounded bg-blue-50 text-blue-700 text-xs font-semibold"
                             >
                               {day}
                             </span>
@@ -369,7 +361,7 @@ const FlightSchedulesPage = () => {
                               schedule,
                             )
                           }
-                          className="p-2 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all"
+                          className="p-2 rounded hover:bg-blue-50 hover:text-blue-600 transition-all"
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
@@ -380,7 +372,7 @@ const FlightSchedulesPage = () => {
                               schedule,
                             )
                           }
-                          className="p-2 rounded-lg hover:bg-red-50 hover:text-red-600 transition-all"
+                          className="p-2 rounded hover:bg-red-50 hover:text-red-600 transition-all"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

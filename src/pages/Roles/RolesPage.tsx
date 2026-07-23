@@ -21,7 +21,7 @@ const RolesPage = () => {
       </div>
 
       <div className="premium-card p-10 flex flex-col items-center text-center gap-4">
-        <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center">
+        <div className="w-14 h-14 rounded-md bg-amber-50 text-amber-500 flex items-center justify-center">
           <ShieldAlert className="w-7 h-7" />
         </div>
         <div className="space-y-1 max-w-md">

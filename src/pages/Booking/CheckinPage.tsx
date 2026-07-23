@@ -80,14 +80,14 @@ const CheckinPage = () => {
             placeholder="Ticket number"
             value={ticketNumber}
             onChange={(e) => setTicketNumber(e.target.value)}
-            className="flex-1 bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+            className="flex-1 bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
           />
           <input
             type="number"
             placeholder="Baggage count (optional)"
             value={baggageCount}
             onChange={(e) => setBaggageCount(e.target.value)}
-            className="w-full md:w-56 bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+            className="w-full md:w-56 bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
           />
           <button
             onClick={handleCheckIn}
@@ -100,7 +100,7 @@ const CheckinPage = () => {
         </div>
 
         {checkinResult && (
-          <div className="mt-4 p-6 bg-emerald-50/50 border border-emerald-100 rounded-2xl">
+          <div className="mt-4 p-6 bg-emerald-50/50 border border-emerald-100 rounded-md">
             <div className="flex items-center gap-2 mb-4 text-emerald-700">
               <CheckCircle2 className="w-5 h-5" />
               <h3 className="font-bold">Checked in: {checkinResult.passenger_name}</h3>
@@ -125,14 +125,14 @@ const CheckinPage = () => {
             placeholder="Passenger ID"
             value={passengerId}
             onChange={(e) => setPassengerId(e.target.value)}
-            className="flex-1 bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+            className="flex-1 bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
           />
           <input
             type="number"
             placeholder="Segment ID"
             value={segmentId}
             onChange={(e) => setSegmentId(e.target.value)}
-            className="flex-1 bg-slate-50 border-none rounded-xl py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+            className="flex-1 bg-slate-50 border-none rounded py-3 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
           />
           <button
             onClick={handleLookupBoardingPass}
@@ -145,7 +145,7 @@ const CheckinPage = () => {
         </div>
 
         {boardingPass && (
-          <div className="mt-4 p-6 bg-slate-50 rounded-2xl grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div className="mt-4 p-6 bg-slate-50 rounded-md grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div><span className="text-slate-500">Boarding pass #</span><div className="font-bold text-slate-900">{boardingPass.BoardingPassNumber}</div></div>
             <div><span className="text-slate-500">Group</span><div className="font-bold text-slate-900">{boardingPass.BoardingGroup}</div></div>
             <div><span className="text-slate-500">Gate</span><div className="font-bold text-slate-900">{boardingPass.Gate}</div></div>

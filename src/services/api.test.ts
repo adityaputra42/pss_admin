@@ -20,6 +20,10 @@ const localStorageMock = (() => {
 
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
+// Define the mock axios instance structure.
+// vi.mock() factories are hoisted above regular code, so anything they
+// reference from outer scope must be created via vi.hoisted() too, or
+// you get "Cannot access before initialization".
 const { mockAxiosInstance } = vi.hoisted(() => ({
   mockAxiosInstance: {
     interceptors: {
@@ -36,6 +40,9 @@ const { mockAxiosInstance } = vi.hoisted(() => ({
     delete: vi.fn(),
   },
 }));
+
+// Mock axios directly. This will replace the actual axios module.
+// This factory function runs once when the test file is loaded.
 vi.mock('axios', () => ({
   __esModule: true,
   default: {
@@ -46,6 +53,9 @@ vi.mock('axios', () => ({
     delete: vi.fn(),
   },
 }));
+
+// Import `api` and `axios` after mocking.
+// `api.ts` will now use the mocked axios.
 import api from './api-client';
 import axios from 'axios';
 import type { Mocked } from 'vitest';
@@ -80,7 +90,7 @@ describe('api interceptors', () => {
 
   it('should add Authorization header if accessToken exists', async () => {
     useAuthStore.setState({ accessToken: 'test_access_token' });
-
+    
     // Mock the actual request that the interceptor will eventually make
     mockAxiosInstance.get.mockResolvedValue({ data: {} });
 

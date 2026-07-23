@@ -114,7 +114,7 @@ const AircraftPage = () => {
               </h3>
             </div>
 
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+            <div className="w-14 h-14 rounded-md bg-primary/10 flex items-center justify-center text-primary">
               <Plane className="w-7 h-7" />
             </div>
           </div>
@@ -135,7 +135,7 @@ const AircraftPage = () => {
               </p>
             </div>
 
-            <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
+            <div className="w-14 h-14 rounded-md bg-blue-100 flex items-center justify-center text-blue-600">
               <Users className="w-7 h-7" />
             </div>
           </div>
@@ -153,7 +153,7 @@ const AircraftPage = () => {
               </h3>
             </div>
 
-            <div className="w-14 h-14 rounded-2xl bg-violet-100 flex items-center justify-center text-violet-600">
+            <div className="w-14 h-14 rounded-md bg-violet-100 flex items-center justify-center text-violet-600">
               <Building2 className="w-7 h-7" />
             </div>
           </div>
@@ -169,14 +169,14 @@ const AircraftPage = () => {
             placeholder="Search aircraft model or manufacturer..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-50 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none"
+            className="w-full bg-slate-50 border-none rounded py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none"
           />
         </div>
 
         <select
           value={manufacturerFilter}
           onChange={(e) => setManufacturerFilter(e.target.value)}
-          className="bg-slate-50 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none"
+          className="bg-slate-50 border-none rounded px-4 py-2 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none"
         >
           {manufacturers.map((manufacturer) => (
             <option key={manufacturer} value={manufacturer}>
@@ -197,7 +197,7 @@ const AircraftPage = () => {
           </div>
         ) : filteredAircrafts.length === 0 ? (
           <div className="col-span-full premium-card p-20 text-center">
-            <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-md flex items-center justify-center mx-auto mb-4">
               <Plane className="w-8 h-8" />
             </div>
 
@@ -212,18 +212,18 @@ const AircraftPage = () => {
               className="premium-card p-6 hover:shadow-2xl transition-all duration-300 border border-slate-100"
             >
               <div className="flex items-start justify-between mb-6">
-                <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center text-primary">
+                <div className="w-16 h-16 rounded-md bg-primary/10 flex items-center justify-center text-primary">
                   <Plane className="w-8 h-8" />
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded-xl transition-all">
+                  <button className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded transition-all">
                     <Edit3 className="w-4 h-4" />
                   </button>
 
                   <button
                     onClick={() => handleDelete(aircraft)}
-                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -242,7 +242,7 @@ const AircraftPage = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-slate-50 rounded-2xl p-4">
+                  <div className="bg-slate-50 rounded-md p-4">
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                       Registration
                     </p>
@@ -252,7 +252,7 @@ const AircraftPage = () => {
                     </h4>
                   </div>
 
-                  <div className="bg-slate-50 rounded-2xl p-4">
+                  <div className="bg-slate-50 rounded-md p-4">
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
                       Manufacturer
                     </p>
@@ -274,7 +274,7 @@ const AircraftPage = () => {
                     </p>
                   </div>
 
-                  <button className="px-4 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-secondary transition-colors">
+                  <button className="px-4 py-2 rounded bg-primary text-white text-sm font-semibold hover:bg-secondary transition-colors">
                     View Details
                   </button>
                 </div>

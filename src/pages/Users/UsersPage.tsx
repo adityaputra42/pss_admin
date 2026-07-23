@@ -75,7 +75,7 @@ const UsersPage = () => {
               type="number"
               value={statusUserId}
               onChange={(e) => setStatusUserId(e.target.value)}
-              className="bg-slate-50 border-none rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20 w-40"
+              className="bg-slate-50 border-none rounded py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20 w-40"
             />
           </div>
           <div className="space-y-1.5">
@@ -83,7 +83,7 @@ const UsersPage = () => {
             <select
               value={statusValue}
               onChange={(e) => setStatusValue(e.target.value as any)}
-              className="bg-slate-50 border-none rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+              className="bg-slate-50 border-none rounded py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
             >
               <option value="ACTIVE">ACTIVE</option>
               <option value="LOCKED">LOCKED</option>
@@ -104,7 +104,7 @@ const UsersPage = () => {
       {lastUser && (
         <div className="premium-card p-6">
           <h2 className="text-lg font-bold text-slate-900 mb-2">Last Created/Updated User</h2>
-          <pre className="text-xs bg-slate-50 rounded-xl p-4 overflow-x-auto">
+          <pre className="text-xs bg-slate-50 rounded p-4 overflow-x-auto">
             {JSON.stringify(
               { id: lastUser.id, username: lastUser.username, full_name: lastUser.full_name, email: lastUser.email, role_id: lastUser.role_id, status: lastUser.status },
               null,

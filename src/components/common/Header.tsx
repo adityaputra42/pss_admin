@@ -29,7 +29,7 @@ const Header = () => {
             <input
               type="text"
               placeholder="Search anything..."
-              className="w-full bg-slate-50 border-none rounded-xl py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 transition-all outline-none"
+              className="w-full bg-slate-50 border-none rounded py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 transition-all outline-none"
             />
          </div>
       </div>
@@ -40,11 +40,11 @@ const Header = () => {
       <div className="flex items-center gap-2 md:gap-4 ml-auto">
         {/* Quick actions */}
         <div className="flex items-center gap-1 md:gap-2 mr-1 md:mr-4 border-r border-slate-100 pr-2 md:pr-4">
-            <button className="p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors relative group">
+            <button className="p-2 text-slate-500 hover:bg-slate-50 rounded transition-colors relative group">
                 <Bell className="w-5 h-5 group-hover:shake transition-all" />
                 <div className="absolute top-2 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></div>
             </button>
-            <button className="hidden sm:block p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors">
+            <button className="hidden sm:block p-2 text-slate-500 hover:bg-slate-50 rounded transition-colors">
                 <Settings className="w-5 h-5" />
             </button>
         </div>
@@ -58,11 +58,11 @@ const Header = () => {
 
           <div className="group relative">
               <button
-                  className="flex items-center gap-2 p-0.5 md:p-1 rounded-xl hover:bg-slate-50 transition-colors"
+                  className="flex items-center gap-2 p-0.5 md:p-1 rounded hover:bg-slate-50 transition-colors"
                   onClick={handleLogout}
                   title="Logout"
               >
-                <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl overflow-hidden ring-2 ring-teal-50 shadow-sm transform group-active:scale-95 transition-transform">
+                <div className="w-9 h-9 md:w-10 md:h-10 rounded overflow-hidden ring-2 ring-teal-50 shadow-sm transform group-active:scale-95 transition-transform">
                      <img src={`https://ui-avatars.com/api/?name=${user?.full_name}&background=6366f1&color=fff`} alt="Profile" />
                 </div>
                 <LogOut className="w-4 h-4 text-slate-400 group-hover:text-rose-500 transition-colors hidden md:block" />
