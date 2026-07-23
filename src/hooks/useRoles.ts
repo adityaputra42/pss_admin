@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { rolesApi } from '../services/api-services';
-import type { Role } from '../types/api';
+import type { Role } from '../types/rbac';
 
 export const useRoles = () => {
   const [roles, setRoles] = useState<Role[]>([]);

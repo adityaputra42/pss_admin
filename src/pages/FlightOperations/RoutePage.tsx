@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import type { FlightSchedule } from '../../types/api';
+import type { Airport, FlightSchedule } from '../../types/api';
 
 import {
   ArrowRight,
@@ -12,13 +12,14 @@ import {
   Route,
   CalendarDays,
 } from 'lucide-react';
-import { flightSchedulesApi } from '../../services/api-services';
+import { flightSchedulesApi, airportsApi } from '../../services/api-services';
 
 
 const RoutesPage = () => {
   const [schedules, setSchedules] = useState<
     FlightSchedule[]
   >([]);
+  const [airports, setAirports] = useState<Airport[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,7 +29,14 @@ const RoutesPage = () => {
 
   useEffect(() => {
     fetchRoutes();
+    airportsApi.getAirports().then(setAirports).catch(() => {});
   }, []);
+
+  const airportById = useMemo(() => {
+    const map = new Map<number, Airport>();
+    for (const a of airports) map.set(a.id, a);
+    return map;
+  }, [airports]);
 
   const fetchRoutes = async () => {
     setIsLoading(true);
@@ -53,33 +61,36 @@ const RoutesPage = () => {
    * Group schedules by route
    * Example:
    * CGK -> DPS
+   *
+   * ⚠️ /flights/schedules only returns departure_airport_id/
+   * arrival_airport_id (no joined airport data) -- resolved here against
+   * the separately-fetched airports list.
    */
   const groupedRoutes = useMemo(() => {
     const map = new Map<
       string,
       {
         routeKey: string;
-        departureAirport: any;
-        arrivalAirport: any;
+        departureAirport: Airport | undefined;
+        arrivalAirport: Airport | undefined;
         schedules: FlightSchedule[];
       }
     >();
 
     for (const item of schedules) {
-      const dep =
-        item.departure_airport?.code || 'UNK';
+      const depAirport = airportById.get(item.departure_airport_id);
+      const arrAirport = airportById.get(item.arrival_airport_id);
 
-      const arr =
-        item.arrival_airport?.code || 'UNK';
+      const dep = depAirport?.code || `#${item.departure_airport_id}`;
+      const arr = arrAirport?.code || `#${item.arrival_airport_id}`;
 
       const key = `${dep}-${arr}`;
 
       if (!map.has(key)) {
         map.set(key, {
           routeKey: key,
-          departureAirport:
-            item.departure_airport,
-          arrivalAirport: item.arrival_airport,
+          departureAirport: depAirport,
+          arrivalAirport: arrAirport,
           schedules: [],
         });
       }
@@ -88,7 +99,7 @@ const RoutesPage = () => {
     }
 
     return Array.from(map.values());
-  }, [schedules]);
+  }, [schedules, airportById]);
 
   const filteredRoutes = groupedRoutes.filter(
     (route) => {
@@ -111,26 +122,8 @@ const RoutesPage = () => {
     },
   );
 
-  const formatOperatingDays = (
-    days?: string,
-  ) => {
-    if (!days) return '-';
-
-    const map: Record<string, string> = {
-      '1': 'Mon',
-      '2': 'Tue',
-      '3': 'Wed',
-      '4': 'Thu',
-      '5': 'Fri',
-      '6': 'Sat',
-      '7': 'Sun',
-    };
-
-    return days
-      .split(',')
-      .map((d) => map[d] || d)
-      .join(', ');
-  };
+  // No formatOperatingDays needed -- schedule.operating_days_labels is
+  // already decoded server-side.
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -363,11 +356,7 @@ const RoutesPage = () => {
                             </div>
 
                             <div className="flex flex-wrap justify-end gap-1">
-                              {formatOperatingDays(
-                                schedule.operating_days,
-                              )
-                                .split(', ')
-                                .map((day) => (
+                              {schedule.operating_days_labels.map((day) => (
                                   <span
                                     key={
                                       schedule.id +

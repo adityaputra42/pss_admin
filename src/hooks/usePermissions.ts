@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { rolesApi } from '../services/api-services';
 import { useAuthStore } from '../hooks/useAuth';
-import type { Permission } from '../types/api';
+import type { Permission } from '../types/rbac';
 
 export const usePermissions = () => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);

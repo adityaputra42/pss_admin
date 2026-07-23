@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import type { FlightSchedule } from '../../types/api';
+import { useEffect, useMemo, useState } from 'react';
+import type { Airport, FlightSchedule } from '../../types/api';
 
 import {
   Calendar,
@@ -18,11 +18,12 @@ import {
   showErrorAlert,
   showSuccessAlert,
 } from '../../utils/alerts';
-import { flightSchedulesApi } from '../../services/api-services';
+import { flightSchedulesApi, airportsApi } from '../../services/api-services';
 
 
 const FlightSchedulesPage = () => {
   const [schedules, setSchedules] = useState<FlightSchedule[]>([]);
+  const [airports, setAirports] = useState<Airport[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -30,13 +31,27 @@ const FlightSchedulesPage = () => {
   const [search, setSearch] = useState('');
 
   // modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingSchedule, setEditingSchedule] =
+  // Read side (isModalOpen/editingSchedule) isn't used yet -- the
+  // FlightScheduleFormModal below is commented out pending that
+  // component being built. Setters are kept so handleAddSchedule/
+  // handleEditSchedule stay ready to wire up.
+  const [, setIsModalOpen] = useState(false);
+  const [, setEditingSchedule] =
     useState<FlightSchedule | null>(null);
 
   useEffect(() => {
     fetchSchedules();
+    airportsApi.getAirports().then(setAirports).catch(() => {});
   }, []);
+
+  // /flights/schedules doesn't return joined airport data (only
+  // departure_airport_id/arrival_airport_id) -- resolve names client-side
+  // against the airports list fetched above.
+  const airportById = useMemo(() => {
+    const map = new Map<number, Airport>();
+    for (const a of airports) map.set(a.id, a);
+    return map;
+  }, [airports]);
 
   const fetchSchedules = async () => {
     setIsLoading(true);
@@ -59,23 +74,17 @@ const FlightSchedulesPage = () => {
 
   const filteredSchedules = schedules.filter((item) => {
     const keyword = search.toLowerCase();
+    const dep = airportById.get(item.departure_airport_id);
+    const arr = airportById.get(item.arrival_airport_id);
 
     return (
       item.flight_number
         ?.toLowerCase()
         .includes(keyword) ||
-      item.departure_airport?.code
-        ?.toLowerCase()
-        .includes(keyword) ||
-      item.arrival_airport?.code
-        ?.toLowerCase()
-        .includes(keyword) ||
-      item.departure_airport?.city
-        ?.toLowerCase()
-        .includes(keyword) ||
-      item.arrival_airport?.city
-        ?.toLowerCase()
-        .includes(keyword)
+      dep?.code?.toLowerCase().includes(keyword) ||
+      arr?.code?.toLowerCase().includes(keyword) ||
+      dep?.city?.toLowerCase().includes(keyword) ||
+      arr?.city?.toLowerCase().includes(keyword)
     );
   });
 
@@ -131,24 +140,8 @@ const FlightSchedulesPage = () => {
     }
   };
 
-  const formatOperatingDays = (days?: string) => {
-    if (!days) return '-';
-
-    const map: Record<string, string> = {
-      '1': 'Mon',
-      '2': 'Tue',
-      '3': 'Wed',
-      '4': 'Thu',
-      '5': 'Fri',
-      '6': 'Sat',
-      '7': 'Sun',
-    };
-
-    return days
-      .split(',')
-      .map((d) => map[d] || d)
-      .join(', ');
-  };
+  // No formatOperatingDays needed -- schedule.operating_days_labels is
+  // already decoded server-side (e.g. ["MON","WED","FRI"]).
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -275,7 +268,10 @@ const FlightSchedulesPage = () => {
               </thead>
 
               <tbody className="divide-y divide-slate-100">
-                {filteredSchedules.map((schedule) => (
+                {filteredSchedules.map((schedule) => {
+                  const dep = airportById.get(schedule.departure_airport_id);
+                  const arr = airportById.get(schedule.arrival_airport_id);
+                  return (
                   <tr
                     key={schedule.id}
                     className="hover:bg-slate-50 transition-colors"
@@ -302,26 +298,15 @@ const FlightSchedulesPage = () => {
                     {/* route */}
                     <td className="px-6 py-5">
                       <div className="font-semibold text-slate-800">
-                        {
-                          schedule.departure_airport
-                            ?.code
-                        }{' '}
+                        {dep?.code ?? `#${schedule.departure_airport_id}`}{' '}
                         →{' '}
-                        {
-                          schedule.arrival_airport?.code
-                        }
+                        {arr?.code ?? `#${schedule.arrival_airport_id}`}
                       </div>
 
                       <div className="text-xs text-slate-500 mt-1">
-                        {
-                          schedule.departure_airport
-                            ?.city
-                        }{' '}
+                        {dep?.city ?? '-'}{' '}
                         →{' '}
-                        {
-                          schedule.arrival_airport
-                            ?.city
-                        }
+                        {arr?.city ?? '-'}
                       </div>
                     </td>
 
@@ -364,11 +349,7 @@ const FlightSchedulesPage = () => {
                     {/* operating days */}
                     <td className="px-6 py-5">
                       <div className="flex flex-wrap gap-2">
-                        {formatOperatingDays(
-                          schedule.operating_days,
-                        )
-                          .split(', ')
-                          .map((day) => (
+                        {schedule.operating_days_labels.map((day) => (
                             <span
                               key={day}
                               className="px-2 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold"
@@ -406,7 +387,8 @@ const FlightSchedulesPage = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

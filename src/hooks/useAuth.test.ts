@@ -51,6 +51,9 @@ describe('useAuthStore', () => {
       is_active: true,
       created_at: '',
       last_login_at: '',
+      full_name: 'Test User',
+      role_id: 1,
+      status: 'ACTIVE',
       permissions: ['read:users', 'write:users']
     };
 
@@ -77,6 +80,9 @@ describe('useAuthStore', () => {
       is_active: true,
       created_at: '',
       last_login_at: '',
+      full_name: 'Test User',
+      role_id: 1,
+      status: 'ACTIVE',
       permissions: ['read:users']
     };
 
@@ -101,6 +107,9 @@ describe('useAuthStore', () => {
       is_active: true,
       created_at: '',
       last_login_at: '',
+      full_name: 'Test User',
+      role_id: 1,
+      status: 'ACTIVE',
       permissions: ['read:users']
     };
 
@@ -134,6 +143,9 @@ describe('useAuthStore', () => {
       is_active: true,
       created_at: '',
       last_login_at: '',
+      full_name: 'Test User',
+      role_id: 1,
+      status: 'ACTIVE',
       permissions: ['read:users', 'write:users']
     };
 

@@ -36,7 +36,6 @@ export const useDashboardData = () => {
         dashboardApi.getBookingStatus(),
         dashboardApi.getTodayFlights(),
         dashboardApi.getRecentBookings(),
-        dashboardApi.getAlerts(),
       ]);
 
       const [
@@ -45,7 +44,6 @@ export const useDashboardData = () => {
         bookingStatusRes,
         todayFlightsRes,
         recentBookingsRes,
-        alertsRes,
       ] = results;
 
       setData({
@@ -73,11 +71,7 @@ export const useDashboardData = () => {
           recentBookingsRes.status === 'fulfilled'
             ? recentBookingsRes.value ?? []
             : [],
-
-        alerts:
-          alertsRes.status === 'fulfilled'
-            ? alertsRes.value ?? []
-            : [],
+     alerts: [],
 
         isLoading: false,
         error: null,

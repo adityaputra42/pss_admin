@@ -20,24 +20,22 @@ const localStorageMock = (() => {
 
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
-// Define the mock axios instance structure
-const mockAxiosInstance = {
-  interceptors: {
-    request: {
-      use: vi.fn(),
+const { mockAxiosInstance } = vi.hoisted(() => ({
+  mockAxiosInstance: {
+    interceptors: {
+      request: {
+        use: vi.fn(),
+      },
+      response: {
+        use: vi.fn(),
+      },
     },
-    response: {
-      use: vi.fn(),
-    },
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
   },
-  get: vi.fn(),
-  post: vi.fn(),
-  put: vi.fn(),
-  delete: vi.fn(),
-};
-
-// Mock axios directly. This will replace the actual axios module.
-// This factory function runs once when the test file is loaded.
+}));
 vi.mock('axios', () => ({
   __esModule: true,
   default: {
@@ -48,14 +46,12 @@ vi.mock('axios', () => ({
     delete: vi.fn(),
   },
 }));
-
-// Import `api` and `axios` after mocking.
-// `api.ts` will now use the mocked axios.
-import api from './api';
+import api from './api-client';
 import axios from 'axios';
+import type { Mocked } from 'vitest';
 
 // Cast axios to its mocked type for easier access to mock properties
-const mockedAxios = axios as vi.Mocked<typeof axios>;
+const mockedAxios = axios as Mocked<typeof axios>;
 
 describe('api interceptors', () => {
   beforeEach(() => {
@@ -84,7 +80,7 @@ describe('api interceptors', () => {
 
   it('should add Authorization header if accessToken exists', async () => {
     useAuthStore.setState({ accessToken: 'test_access_token' });
-    
+
     // Mock the actual request that the interceptor will eventually make
     mockAxiosInstance.get.mockResolvedValue({ data: {} });
 

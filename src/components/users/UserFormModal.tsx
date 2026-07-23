@@ -6,24 +6,34 @@ import { z } from 'zod';
 import { X, User as UserIcon, Mail, Shield, Lock } from 'lucide-react';
 
 import type { User } from '../../types/api';
-import { useRoles } from '../../hooks/useRoles';
 
-const userSchema = z.object({
-  first_name: z.string().min(1, 'First name is required'),
-  last_name: z.string().min(1, 'Last name is required'),
+/**
+ * ⚠️ Backend reality: register/update only take a single `full_name`
+ * field (see registerRequest/updateUserRequest in auth_handler.go) --
+ * there's no first_name/last_name split server-side. role_id is a plain
+ * number here (not a dropdown) because there is no GET /roles endpoint
+ * to populate one from -- see roles.ts.
+ */
+const createSchema = z.object({
+  full_name: z.string().min(1, 'Full name is required'),
   email: z.string().email('Invalid email'),
   username: z.string().min(3, 'Username must be at least 3 characters'),
-  password: z.string().min(8, 'Password must be at least 8 characters').optional(),
-  role_id: z.number().positive('Role is required'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  role_id: z.number().positive('Role ID is required'),
 });
 
-type UserFormInputs = z.infer<typeof userSchema>;
+const updateSchema = z.object({
+  full_name: z.string().min(1, 'Full name is required'),
+  email: z.string().email('Invalid email'),
+});
+
+type UserFormInputs = z.infer<typeof createSchema>;
 
 interface UserFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: User | null;
-  onSave: (data: UserFormInputs, userId: number | null) => Promise<void> | void;
+  onSave: (data: Record<string, unknown>, userId: number | null) => Promise<void> | void;
 }
 
 const UserFormModal: React.FC<UserFormModalProps> = ({
@@ -32,19 +42,15 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
   user,
   onSave,
 }) => {
-  const { roles } = useRoles();
-
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-    unregister,
   } = useForm<UserFormInputs>({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(user ? updateSchema : createSchema) as any,
     defaultValues: {
-      first_name: '',
-      last_name: '',
+      full_name: '',
       email: '',
       username: '',
       password: '',
@@ -57,27 +63,27 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
 
     if (user) {
       reset({
-        first_name: user.first_name,
-        last_name: user.last_name,
+        full_name: (user as any).full_name ?? '',
         email: user.email,
         username: user.username,
-        role_id: user.role?.id,
       });
-      unregister('password');
     } else {
       reset({
-        first_name: '',
-        last_name: '',
+        full_name: '',
         email: '',
         username: '',
         password: '',
         role_id: undefined,
       });
     }
-  }, [isOpen, user, reset, unregister]);
+  }, [isOpen, user, reset]);
 
   const onSubmit = async (data: UserFormInputs) => {
-    const payload = user && !data.password ? { ...data, password: undefined } : data;
+    // Update only sends full_name/email -- username/password/role_id
+    // aren't editable via PUT /auth/users/{id}.
+    const payload = user
+      ? { full_name: data.full_name, email: data.email }
+      : data;
     await onSave(payload, user ? user.id : null);
   };
 
@@ -121,17 +127,10 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-5">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1.5 focus-within:text-primary transition-colors">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">First Name</label>
-                            <input {...register('first_name')} className="w-full bg-slate-50 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-medium" />
-                            {errors.first_name && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.first_name.message}</p>}
-                        </div>
-                        <div className="space-y-1.5 focus-within:text-primary transition-colors">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Last Name</label>
-                            <input {...register('last_name')} className="w-full bg-slate-50 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-medium" />
-                            {errors.last_name && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.last_name.message}</p>}
-                        </div>
+                    <div className="space-y-1.5 focus-within:text-primary transition-colors">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
+                        <input {...register('full_name')} className="w-full bg-slate-50 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-medium" />
+                        {errors.full_name && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.full_name.message}</p>}
                     </div>
 
                     <div className="space-y-1.5 focus-within:text-primary transition-colors">
@@ -143,16 +142,17 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                         {errors.email && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.email.message}</p>}
                     </div>
 
-                    <div className="space-y-1.5 focus-within:text-primary transition-colors">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Username</label>
-                        <div className="relative">
-                            <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <input {...register('username')} className="w-full bg-slate-50 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-semibold" />
-                        </div>
-                        {errors.username && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.username.message}</p>}
-                    </div>
-
                     {!user && (
+                      <>
+                        <div className="space-y-1.5 focus-within:text-primary transition-colors">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Username</label>
+                            <div className="relative">
+                                <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input {...register('username')} className="w-full bg-slate-50 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-semibold" />
+                            </div>
+                            {errors.username && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.username.message}</p>}
+                        </div>
+
                         <div className="space-y-1.5 focus-within:text-primary transition-colors">
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Initial Password</label>
                             <div className="relative">
@@ -161,21 +161,19 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                             </div>
                             {errors.password && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.password.message}</p>}
                         </div>
-                    )}
 
-                    <div className="space-y-1.5 focus-within:text-primary transition-colors">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Assign Security Role</label>
-                        <div className="relative">
-                            <Shield className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                            <select {...register('role_id', { valueAsNumber: true })} className="w-full bg-slate-50 border-none rounded-xl py-3 pl-10 pr-8 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-bold appearance-none">
-                                <option value="">Select a role...</option>
-                                {roles?.map(role => (
-                                    <option key={role.id} value={role.id}>{role.name}</option>
-                                ))}
-                            </select>
+                        <div className="space-y-1.5 focus-within:text-primary transition-colors">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                              Role ID <span className="normal-case font-medium text-slate-400">(no roles list from backend -- enter the DB id)</span>
+                            </label>
+                            <div className="relative">
+                                <Shield className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                <input type="number" {...register('role_id', { valueAsNumber: true })} className="w-full bg-slate-50 border-none rounded-xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-teal-500/20 outline-none transition-all font-bold" />
+                            </div>
+                            {errors.role_id && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.role_id.message}</p>}
                         </div>
-                        {errors.role_id && <p className="text-rose-500 text-[10px] font-bold mt-1 ml-1">{errors.role_id.message}</p>}
-                    </div>
+                      </>
+                    )}
 
                     <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-50">
                         <button type="button" onClick={onClose} className="px-6 py-2.5 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">

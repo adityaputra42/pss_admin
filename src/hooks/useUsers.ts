@@ -1,50 +1,55 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { usersApi } from '../services/api-services';
-import { useAuthStore } from '../hooks/useAuth';
 import type { User } from '../types/api';
 
-export const useUsers = (
-  page = 1,
-  limit = 10,
-  search = ''
-) => {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
-  const [users, setUsers] = useState<User[]>([]);
-  const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+export const useUsers = () => {
+  const [lastUser, setLastUser] = useState<User | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchUsers = useCallback(async () => {
-    if (!isAuthenticated) return;
-
-    setIsLoading(true);
+  const createUser = useCallback(async (data: Parameters<typeof usersApi.createUser>[0]) => {
+    setIsSubmitting(true);
     setError(null);
-
     try {
-      const response = await usersApi.getUsers(page, limit, search);
-      
-      setUsers(Array.isArray(response.users) ? response.users : []);
-      setTotal(response.total ?? 0);
+      const user = await usersApi.createUser(data);
+      setLastUser(user);
+      return user;
     } catch (err) {
-      console.error('Fetch users error:', err);
-      setError('Failed to fetch users');
-      setUsers([]);
-      setTotal(0);
+      setError('Failed to create user');
+      throw err;
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
-  }, [page, limit, search, isAuthenticated]);
+  }, []);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+  const updateUser = useCallback(async (id: string, data: Parameters<typeof usersApi.updateUser>[1]) => {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const user = await usersApi.updateUser(id, data);
+      setLastUser(user);
+      return user;
+    } catch (err) {
+      setError('Failed to update user');
+      throw err;
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, []);
 
-  return {
-    users,
-    total,
-    isLoading,
-    error,
-    refetch: fetchUsers,
-  };
+  const setUserStatus = useCallback(async (id: string, status: 'ACTIVE' | 'LOCKED' | 'INACTIVE') => {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      await usersApi.setUserStatus(id, status);
+    } catch (err) {
+      setError('Failed to change user status');
+      throw err;
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, []);
+
+  return { lastUser, isSubmitting, error, createUser, updateUser, setUserStatus };
 };

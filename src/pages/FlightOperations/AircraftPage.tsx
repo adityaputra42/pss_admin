@@ -63,11 +63,6 @@ const AircraftPage = () => {
     return matchesSearch && matchesManufacturer;
   });
 
-  const totalSeats = filteredAircrafts.reduce(
-    (acc, item) => acc + (item.total_seats || 0),
-    0,
-  );
-
   const handleDelete = async (aircraft: Aircraft) => {
     const confirmed = await showConfirmAlert(
       'Delete Aircraft',
@@ -129,12 +124,15 @@ const AircraftPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-slate-500 font-medium">
-                Total Seats
+                Registered Fleet
               </p>
 
               <h3 className="text-3xl font-bold text-slate-900 mt-2">
-                {totalSeats}
+                {filteredAircrafts.length}
               </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Seat counts aren't returned here -- see each aircraft's seat layout.
+              </p>
             </div>
 
             <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
@@ -246,11 +244,11 @@ const AircraftPage = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-slate-50 rounded-2xl p-4">
                     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                      Total Seats
+                      Registration
                     </p>
 
                     <h4 className="text-2xl font-bold text-slate-900 mt-2">
-                      {aircraft.total_seats}
+                      {aircraft.registration_number}
                     </h4>
                   </div>
 

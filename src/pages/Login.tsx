@@ -20,6 +20,7 @@ const LoginPage = () => {
 
     try {
       const data = await authApi.login({ email: username, password });
+      console.log('LOGIN RESPONSE:', data);
       const { access_token, refresh_token, user } = data;
       login(access_token, refresh_token, user);
       navigate('/dashboard');

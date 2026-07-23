@@ -30,7 +30,7 @@ export const useAuthStore = create<AuthState>()(
           refreshToken,
           user,
           isAuthenticated: true,
-          permissions: user.permissions || [],
+          permissions: [],
         }),
       logout: () =>
         set({

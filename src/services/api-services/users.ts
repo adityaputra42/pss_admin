@@ -4,209 +4,51 @@ import type {
   User,
   UserInput,
   UserUpdateInput,
-  PasswordUpdateInput,
-  UserListResponse,
   ApiResponse,
 } from '../../types/api';
 
-/**
- * Users API Service
- * Passenger Service System - Admin User Management
- */
 export const usersApi = {
   /**
-   * Get paginated users
-   * GET /users
+   * Create user.
+   * POST /auth/register
+   * Body: { username, email, full_name, password, role_id }
    */
-  async getUsers(
-    page: number = 1,
-    limit: number = 10,
-    search?: string,
-    role_id?: number,
-  ): Promise<UserListResponse | null> {
-
-    const response = await api.get<
-      ApiResponse<UserListResponse>
-    >('/users', {
-      params: {
-        page,
-        limit,
-        search,
-        role_id,
-      },
-    });
-
+  async createUser(data: UserInput): Promise<User | null> {
+    const response = await api.post<ApiResponse<User>>('/auth/register', data);
     return response.data.data;
   },
 
   /**
-   * Get user by UID
-   * GET /users/{id}
+   * Update another user's profile (admin).
+   * PUT /auth/users/{id}
+   * Body: { full_name, email } only -- NOT username/role_id/password.
    */
-  async getUserById(
+  async updateUser(id: string, data: UserUpdateInput): Promise<User | null> {
+    const response = await api.put<ApiResponse<User>>(`/auth/users/${id}`, data);
+    return response.data.data;
+  },
+
+  /**
+   * Change a user's status.
+   * PATCH /auth/users/{id}/status
+   * Body: { status: "ACTIVE" | "LOCKED" | "INACTIVE" } (see
+   * domain/user's Status type for the exact allowed values/transitions --
+   * SetUserStatusCommand rejects invalid transitions with 422).
+   */
+  async setUserStatus(
     id: string,
-  ): Promise<User | null> {
-
-    const response = await api.get<
-      ApiResponse<User>
-    >(`/users/${id}`);
-
-    return response.data.data;
-  },
-
-  /**
-   * Create user
-   * POST /users
-   */
-  async createUser(
-    data: UserInput,
-  ): Promise<User | null> {
-
-    const response = await api.post<
-      ApiResponse<User>
-    >('/users', data);
-
-    return response.data.data;
-  },
-
-  /**
-   * Update user
-   * PUT /users/{id}
-   */
-  async updateUser(
-    id: string,
-    data: UserUpdateInput,
-  ): Promise<User | null> {
-
-    const response = await api.put<
-      ApiResponse<User>
-    >(`/users/${id}`, data);
-
-    return response.data.data;
-  },
-
-  /**
-   * Delete user
-   * DELETE /users/{id}
-   */
-  async deleteUser(
-    id: string,
+    status: 'ACTIVE' | 'LOCKED' | 'INACTIVE',
   ): Promise<void> {
-
-    await api.delete(
-      `/users/${id}`,
-    );
+    await api.patch(`/auth/users/${id}/status`, { status });
   },
 
   /**
-   * Activate user
-   * PATCH /users/{id}/activate
+   * Update the CURRENTLY LOGGED-IN user's own profile.
+   * PUT /auth/me
+   * Body: { full_name, email }
    */
-  async activateUser(
-    id: string,
-  ): Promise<User | null> {
-
-    const response = await api.patch<
-      ApiResponse<User>
-    >(`/users/${id}/activate`);
-
+  async updateMe(data: UserUpdateInput): Promise<User | null> {
+    const response = await api.put<ApiResponse<User>>('/auth/me', data);
     return response.data.data;
-  },
-
-  /**
-   * Deactivate user
-   * PATCH /users/{id}/deactivate
-   */
-  async deactivateUser(
-    id: string,
-  ): Promise<User | null> {
-
-    const response = await api.patch<
-      ApiResponse<User>
-    >(`/users/${id}/deactivate`);
-
-    return response.data.data;
-  },
-
-  /**
-   * Update user password
-   * PATCH /users/{id}/password
-   */
-  async updatePassword(
-    id: string,
-    data: PasswordUpdateInput,
-  ): Promise<void> {
-
-    await api.patch(
-      `/users/${id}/password`,
-      data,
-    );
-  },
-
-  /**
-   * Bulk action
-   * POST /users/bulk
-   */
-  async bulkUserActions(
-    action:
-      | 'activate'
-      | 'deactivate'
-      | 'delete',
-    userIds: string[],
-  ): Promise<void> {
-
-    await api.post(
-      '/users/bulk',
-      {
-        action,
-        user_ids: userIds,
-      },
-    );
-  },
-
-  /**
-   * Get current profile
-   * GET /profile
-   */
-  async getProfile(): Promise<User | null> {
-
-    const response = await api.get<
-      ApiResponse<User>
-    >('/profile');
-
-    return response.data.data;
-  },
-
-  /**
-   * Update current profile
-   * PUT /profile
-   */
-  async updateProfile(
-    data: UserUpdateInput,
-  ): Promise<User | null> {
-
-    const response = await api.put<
-      ApiResponse<User>
-    >('/profile', data);
-
-    return response.data.data;
-  },
-
-  /**
-   * Update current profile password
-   * PATCH /profile/password
-   */
-  async updateProfilePassword(
-    data: {
-      old_password: string;
-      new_password: string;
-      confirm_password: string;
-    },
-  ): Promise<void> {
-
-    await api.patch(
-      '/profile/password',
-      data,
-    );
   },
 };

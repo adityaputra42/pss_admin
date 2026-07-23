@@ -37,8 +37,8 @@ api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // 🚫 JANGAN PASANG TOKEN SAAT LOGIN / REFRESH
     if (
-      config.url?.includes('/auth/admin/login') ||
-      config.url?.includes('/auth/refresh')
+      config.url?.includes('/auth/login') ||
+      config.url?.includes('/auth/refresh-token')
     ) {
       delete config.headers.Authorization;
       return config;
@@ -84,7 +84,7 @@ api.interceptors.response.use(
 
       try {
         const refreshResponse = await axios.post(
-          `${API_URL}/auth/refresh`,
+          `${API_URL}/auth/refresh-token`,
           { refresh_token: refreshToken }
         );
 
