@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import type { Airport, FlightSchedule } from '../../types/api';
+import type { Airport, FlightSchedule, ListResponse } from '../../types/api';
 
 import {
   ArrowRight,
@@ -19,7 +19,7 @@ const RoutesPage = () => {
   const [schedules, setSchedules] = useState<
     FlightSchedule[]
   >([]);
-  const [airports, setAirports] = useState<Airport[]>([]);
+  const [airports, setAirports] = useState<ListResponse<Airport>>();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -34,9 +34,9 @@ const RoutesPage = () => {
 
   const airportById = useMemo(() => {
     const map = new Map<number, Airport>();
-    for (const a of airports) map.set(a.id, a);
+    for (const a of airports?.Items??[]) map.set(a.id, a);
     return map;
-  }, [airports]);
+  }, [airports?.Items]);
 
   const fetchRoutes = async () => {
     setIsLoading(true);

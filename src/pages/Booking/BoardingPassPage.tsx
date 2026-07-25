@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Search, ShieldAlert, Armchair } from 'lucide-react';
 
 import { showErrorAlert } from '../../utils/alerts';
+import ScaleIn from '../../components/animations/ScaleIn';
 import { boardingPassApi } from '../../services/api-services';
 import type { BoardingPass } from '../../types/api';
 
@@ -76,6 +77,7 @@ const BoardingPassPage = () => {
 
       {searched && !isLoading && (
         pass ? (
+          <ScaleIn>
           <div className="premium-card p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-md bg-primary/10 text-primary flex items-center justify-center">
@@ -105,6 +107,7 @@ const BoardingPassPage = () => {
               </div>
             </div>
           </div>
+          </ScaleIn>
         ) : (
           <div className="premium-card p-16 text-center">
             <p className="text-slate-500 font-medium">No boarding pass found.</p>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Airport, FlightSearchResult } from '../../types/api';
+import type { Airport, FlightSearchResult, ListResponse } from '../../types/api';
 import {
   Plane,
   Search,
@@ -14,9 +14,10 @@ import { showErrorAlert } from '../../utils/alerts';
 
 import { flightsApi, airportsApi } from '../../services/api-services';
 
+
 const FlightsPage = () => {
   const [flights, setFlights] = useState<FlightSearchResult[]>([]);
-  const [airports, setAirports] = useState<Airport[]>([]);
+  const [airports, setAirports] = useState<ListResponse<Airport>>();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
@@ -26,31 +27,16 @@ const FlightsPage = () => {
   const [date, setDate] = useState(
     new Date().toISOString().split('T')[0],
   );
-useEffect(() => {
-  airportsApi.getAirports().then((res) => {
-    console.log("getAirports result:", res);
-    console.log("Array?", Array.isArray(res));
 
-    setAirports(res.Items);
-  });
-}, []);
+  useEffect(() => {
+    airportsApi.getAirports().then(setAirports).catch(() => {});
+  }, []);
 
-
-const airportById = useMemo(() => {
-  console.log(airports);
-
-  const map = new Map<number, Airport>();
-
-  if (!Array.isArray(airports)) {
+  const airportById = useMemo(() => {
+    const map = new Map<number, Airport>();
+    for (const a of airports?.Items??[]) map.set(a.id, a);
     return map;
-  }
-
-  for (const airport of airports) {
-    map.set(airport.id, airport);
-  }
-
-  return map;
-}, [airports]);
+  }, [airports?.Items]);
 
   const fetchFlights = async () => {
     if (!depId || !arrId || !date) {
@@ -140,7 +126,7 @@ const airportById = useMemo(() => {
                 className="w-full pl-10 pr-4 py-3 rounded border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none bg-white"
               >
                 <option value="">Select airport</option>
-                {airports.map((a) => (
+                {airports?.Items.map((a) => (
                   <option key={a.id} value={a.id}>{a.code} — {a.city}</option>
                 ))}
               </select>
@@ -159,7 +145,7 @@ const airportById = useMemo(() => {
                 className="w-full pl-10 pr-4 py-3 rounded border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none bg-white"
               >
                 <option value="">Select airport</option>
-                {airports.map((a) => (
+                {airports?.Items.map((a) => (
                   <option key={a.id} value={a.id}>{a.code} — {a.city}</option>
                 ))}
               </select>

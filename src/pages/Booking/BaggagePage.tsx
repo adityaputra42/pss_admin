@@ -1,4 +1,5 @@
 import { ShieldAlert } from 'lucide-react';
+import Floating from '../../components/animations/Floating';
 
 /**
  * ⚠️ Backend reality: there is no baggage module, table, or endpoint
@@ -16,9 +17,11 @@ const BaggagePage = () => {
       </div>
 
       <div className="premium-card p-10 flex flex-col items-center text-center gap-4">
+        <Floating>
         <div className="w-14 h-14 rounded-md bg-amber-50 text-amber-500 flex items-center justify-center">
           <ShieldAlert className="w-7 h-7" />
         </div>
+        </Floating>
         <div className="space-y-1 max-w-md">
           <h2 className="text-lg font-bold text-slate-900">Not available yet</h2>
           <p className="text-sm text-slate-500">

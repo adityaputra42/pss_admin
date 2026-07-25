@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 
 import { showErrorAlert, showSuccessAlert } from '../../utils/alerts';
+import ScaleIn from '../../components/animations/ScaleIn';
 import { checkinsApi } from '../../services/api-services';
 import type { Checkin, BoardingPass } from '../../types/api';
 
@@ -100,6 +101,7 @@ const CheckinPage = () => {
         </div>
 
         {checkinResult && (
+          <ScaleIn>
           <div className="mt-4 p-6 bg-emerald-50/50 border border-emerald-100 rounded-md">
             <div className="flex items-center gap-2 mb-4 text-emerald-700">
               <CheckCircle2 className="w-5 h-5" />
@@ -114,6 +116,7 @@ const CheckinPage = () => {
               <div><span className="text-slate-500">Boarding time</span><div className="font-bold text-slate-900">{checkinResult.boarding_time}</div></div>
             </div>
           </div>
+          </ScaleIn>
         )}
       </div>
 
@@ -145,6 +148,7 @@ const CheckinPage = () => {
         </div>
 
         {boardingPass && (
+          <ScaleIn>
           <div className="mt-4 p-6 bg-slate-50 rounded-md grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div><span className="text-slate-500">Boarding pass #</span><div className="font-bold text-slate-900">{boardingPass.BoardingPassNumber}</div></div>
             <div><span className="text-slate-500">Group</span><div className="font-bold text-slate-900">{boardingPass.BoardingGroup}</div></div>
@@ -153,6 +157,7 @@ const CheckinPage = () => {
             <div><span className="text-slate-500">Boarding time</span><div className="font-bold text-slate-900">{boardingPass.BoardingTime ?? '-'}</div></div>
             <div><span className="text-slate-500">Baggage count</span><div className="font-bold text-slate-900">{boardingPass.BaggageCount}</div></div>
           </div>
+          </ScaleIn>
         )}
       </div>
     </div>

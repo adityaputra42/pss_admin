@@ -1,6 +1,7 @@
 import type {
   Aircraft,
   ApiResponse,
+  ListResponse,
 } from '../../types/api';
 import api from '../api-client';
 
@@ -10,8 +11,8 @@ import api from '../api-client';
  * was /aircraft (singular, top-level) before, which doesn't exist.
  */
 export const aircraftsApi = {
-  async getAircrafts(): Promise<Aircraft[]> {
-    const response = await api.get<ApiResponse<Aircraft[]>>('/flights/aircrafts');
+  async getAircrafts(): Promise<ListResponse<Aircraft>> {
+    const response = await api.get<ApiResponse<ListResponse<Aircraft>>>('/flights/aircrafts');
     return response.data.data ?? [];
   },
 

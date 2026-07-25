@@ -24,7 +24,7 @@ const AirportPage = () => {
 
     try {
       const response = await airportsApi.getAirports();
-      setAirports(response ?? []);
+      setAirports(response?.Items ?? []);
     } catch (error: any) {
       showErrorAlert(
         error?.response?.data?.message || 'Failed to fetch airports',

@@ -24,6 +24,9 @@ import {
 } from 'recharts';
 
 import { StatCard } from '../components/common/StatCard';
+import StaggerContainer from '../components/animations/StagerContainer';
+import StaggerItem from '../components/animations/StaggerItem';
+import Skeleton from '../components/animations/Skeleton';
 
 const BOOKING_STATUS_COLORS = [
   '#14b8a6',
@@ -47,13 +50,16 @@ const DashboardPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin"></div>
-
-          <p className="text-slate-500 font-medium">
-            Loading operational dashboard...
-          </p>
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+        </div>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          <div className="xl:col-span-2"><Skeleton className="h-80 w-full" /></div>
+          <Skeleton className="h-80 w-full" />
         </div>
       </div>
     );
@@ -100,38 +106,46 @@ const DashboardPage = () => {
       </div>
 
       {/* ===== KPI CARDS ===== */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Bookings"
-          value={summary?.total_bookings ?? 0}
-          icon={<Ticket className="w-6 h-6" />}
-          color="teal"
-        />
+      <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <StaggerItem>
+          <StatCard
+            title="Total Bookings"
+            value={summary?.total_bookings ?? 0}
+            icon={<Ticket className="w-6 h-6" />}
+            color="teal"
+          />
+        </StaggerItem>
 
-        <StatCard
-          title="Today's Flights"
-          value={summary?.today_flights ?? 0}
-          icon={<Plane className="w-6 h-6" />}
-          color="teal"
-        />
+        <StaggerItem>
+          <StatCard
+            title="Today's Flights"
+            value={summary?.today_flights ?? 0}
+            icon={<Plane className="w-6 h-6" />}
+            color="teal"
+          />
+        </StaggerItem>
 
-        <StatCard
-          title="Passengers"
-          value={summary?.total_passengers ?? 0}
-          icon={<Users className="w-6 h-6" />}
-          color="emerald"
-        />
+        <StaggerItem>
+          <StatCard
+            title="Passengers"
+            value={summary?.total_passengers ?? 0}
+            icon={<Users className="w-6 h-6" />}
+            color="emerald"
+          />
+        </StaggerItem>
 
-        <StatCard
-          title="Revenue"
-          value={new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
-          }).format(summary?.total_revenue ?? 0)}
-          icon={<Banknote className="w-6 h-6" />}
-          color="amber"
-        />
-      </div>
+        <StaggerItem>
+          <StatCard
+            title="Revenue"
+            value={new Intl.NumberFormat('id-ID', {
+              style: 'currency',
+              currency: 'IDR',
+            }).format(summary?.total_revenue ?? 0)}
+            icon={<Banknote className="w-6 h-6" />}
+            color="amber"
+          />
+        </StaggerItem>
+      </StaggerContainer>
 
       {/* ===== CHART SECTION ===== */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">

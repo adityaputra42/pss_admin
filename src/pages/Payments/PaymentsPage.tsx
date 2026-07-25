@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 
 import { showErrorAlert } from '../../utils/alerts';
+import ScaleIn from '../../components/animations/ScaleIn';
 
 import type { Payment } from '../../types/api';
 import { paymentsApi } from '../../services/api-services';
@@ -108,6 +109,7 @@ const PaymentsPage = () => {
 
       {searched && !isLoading && (
         payment ? (
+          <ScaleIn>
           <div className="premium-card p-8">
             <div className="flex items-start justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
@@ -146,6 +148,7 @@ const PaymentsPage = () => {
               </div>
             </div>
           </div>
+          </ScaleIn>
         ) : (
           <div className="premium-card p-16 text-center">
             <p className="text-slate-500 font-medium">No payment found.</p>

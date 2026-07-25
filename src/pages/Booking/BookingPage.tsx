@@ -12,6 +12,7 @@ import {
 } from '../../utils/alerts';
 
 import { bookingsApi } from '../../services/api-services/booking';
+import ScaleIn from '../../components/animations/ScaleIn';
 
 import type { PNR } from '../../types/api';
 
@@ -129,6 +130,7 @@ const BookingPage = () => {
       </div>
 
       {result && (
+        <ScaleIn>
         <div className="premium-card p-8">
           <div className="flex items-center gap-3 mb-4">
             <CheckCircle2 className="w-6 h-6 text-emerald-500" />
@@ -153,6 +155,7 @@ const BookingPage = () => {
             </div>
           </div>
         </div>
+        </ScaleIn>
       )}
     </div>
   );

@@ -30,6 +30,11 @@ const FlightSchedulesPage = () => {
   // filter
   const [search, setSearch] = useState('');
 
+  // modal
+  // Read side (isModalOpen/editingSchedule) isn't used yet -- the
+  // FlightScheduleFormModal below is commented out pending that
+  // component being built. Setters are kept so handleAddSchedule/
+  // handleEditSchedule stay ready to wire up.
   const [, setIsModalOpen] = useState(false);
   const [, setEditingSchedule] =
     useState<FlightSchedule | null>(null);
@@ -39,6 +44,9 @@ const FlightSchedulesPage = () => {
     airportsApi.getAirports().then(setAirports).catch(() => {});
   }, []);
 
+  // /flights/schedules doesn't return joined airport data (only
+  // departure_airport_id/arrival_airport_id) -- resolve names client-side
+  // against the airports list fetched above.
   const airportById = useMemo(() => {
     const map = new Map<number, Airport>();
     for (const a of airports?.Items??[]) map.set(a.id, a);

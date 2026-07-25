@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { aircraftsApi } from '../../services/api-services/aircraft';
 import type { Aircraft } from '../../types/api';
+import StaggerContainer from '../../components/animations/StagerContainer';
+import StaggerItem from '../../components/animations/StaggerItem';
 import {
   showConfirmAlert,
   showErrorAlert,
@@ -28,7 +30,7 @@ const AircraftPage = () => {
 
     try {
       const response = await aircraftsApi.getAircrafts();
-      setAircrafts(response ?? []);
+      setAircrafts(response.Items ?? []);
     } catch (error: any) {
       showErrorAlert(
         error?.response?.data?.message || 'Failed to fetch aircrafts',
@@ -186,7 +188,7 @@ const AircraftPage = () => {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {loading ? (
           <div className="col-span-full premium-card p-20 flex flex-col items-center justify-center gap-4">
             <div className="w-10 h-10 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin"></div>
@@ -207,8 +209,8 @@ const AircraftPage = () => {
           </div>
         ) : (
           filteredAircrafts.map((aircraft) => (
+            <StaggerItem key={aircraft.id}>
             <div
-              key={aircraft.id}
               className="premium-card p-6 hover:shadow-2xl transition-all duration-300 border border-slate-100"
             >
               <div className="flex items-start justify-between mb-6">
@@ -269,7 +271,7 @@ const AircraftPage = () => {
                       Aircraft ID
                     </p>
 
-                    <p className="text-xs text-slate-500 mt-1 break-all max-w-[180px]">
+                    <p className="text-xs text-slate-500 mt-1 break-all max-w-45">
                       {aircraft.id}
                     </p>
                   </div>
@@ -280,9 +282,10 @@ const AircraftPage = () => {
                 </div>
               </div>
             </div>
+            </StaggerItem>
           ))
         )}
-      </div>
+      </StaggerContainer>
     </div>
   );
 };

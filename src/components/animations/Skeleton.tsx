@@ -1,10 +1,14 @@
 import { motion } from "framer-motion";
 
-export default function Skeleton() {
+type Props = {
+  className?: string;
+};
+
+export default function Skeleton({ className = 'h-20 w-full' }: Props) {
   return (
     <div className="overflow-hidden rounded bg-gray-200">
       <motion.div
-        className="h-20 w-full bg-gray-300"
+        className={`bg-gray-300 ${className}`}
         animate={{
           x: ["-100%", "100%"],
         }}
