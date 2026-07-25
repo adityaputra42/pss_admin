@@ -12,6 +12,7 @@ import {
 
 import { showErrorAlert } from '../../utils/alerts';
 import ScaleIn from '../../components/animations/ScaleIn';
+import DetailTable from '../../components/common/DetailTable';
 
 import type { Payment } from '../../types/api';
 import { paymentsApi } from '../../services/api-services';
@@ -129,24 +130,14 @@ const PaymentsPage = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-slate-50 rounded-md p-4">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Amount</p>
-                <h4 className="text-lg font-bold text-slate-900 mt-2">{payment.Currency} {payment.Amount}</h4>
-              </div>
-              <div className="bg-slate-50 rounded-md p-4">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Method</p>
-                <h4 className="text-lg font-bold text-slate-900 mt-2">{payment.Method}</h4>
-              </div>
-              <div className="bg-slate-50 rounded-md p-4">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Paid At</p>
-                <h4 className="text-sm font-bold text-slate-900 mt-2">{payment.PaidAt ?? '-'}</h4>
-              </div>
-              <div className="bg-slate-50 rounded-md p-4">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Expires At</p>
-                <h4 className="text-sm font-bold text-slate-900 mt-2">{payment.ExpiredAt ?? '-'}</h4>
-              </div>
-            </div>
+            <DetailTable
+              rows={[
+                { label: 'Amount', value: `${payment.Currency} ${payment.Amount}` },
+                { label: 'Method', value: payment.Method },
+                { label: 'Paid At', value: payment.PaidAt ?? '-' },
+                { label: 'Expires At', value: payment.ExpiredAt ?? '-' },
+              ]}
+            />
           </div>
           </ScaleIn>
         ) : (

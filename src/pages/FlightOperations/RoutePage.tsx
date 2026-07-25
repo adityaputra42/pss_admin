@@ -10,7 +10,6 @@ import {
   Search,
   Filter,
   Route,
-  CalendarDays,
 } from 'lucide-react';
 import { flightSchedulesApi, airportsApi } from '../../services/api-services';
 
@@ -217,166 +216,83 @@ const RoutesPage = () => {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {filteredRoutes.map((route) => (
-            <div
-              key={route.routeKey}
-              className="premium-card p-6 hover:shadow-xl transition-all duration-300"
-            >
-              {/* top */}
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-md bg-primary/10 text-primary flex items-center justify-center">
-                      <Plane className="w-5 h-5" />
+        <div className="premium-card overflow-hidden">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-slate-50 bg-slate-50/50">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Route</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Departure</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Arrival</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Schedules</th>
+                <th className="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-wider">Flights</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {filteredRoutes.map((route) => (
+                <tr key={route.routeKey} className="hover:bg-slate-50/50 transition-colors align-top">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <div className="w-9 h-9 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                        <Plane className="w-4 h-4" />
+                      </div>
+                      <span className="font-bold text-slate-900">
+                        {route.departureAirport?.code}
+                        <ArrowRight className="inline w-3.5 h-3.5 mx-1.5 text-slate-400" />
+                        {route.arrivalAirport?.code}
+                      </span>
                     </div>
-
-                    <div>
-                      <h2 className="text-xl font-bold text-slate-900">
-                        {
-                          route.departureAirport
-                            ?.code
-                        }
-
-                        <ArrowRight className="inline w-4 h-4 mx-2" />
-
-                        {
-                          route.arrivalAirport?.code
-                        }
-                      </h2>
-
-                      <p className="text-sm text-slate-500">
-                        {
-                          route.departureAirport
-                            ?.city
-                        }{' '}
-                        →{' '}
-                        {
-                          route.arrivalAirport
-                            ?.city
-                        }
-                      </p>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-1.5 text-slate-400 text-[11px] mb-1">
+                      <MapPin className="w-3.5 h-3.5" /> Departure
                     </div>
-                  </div>
-                </div>
-
-                <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded text-sm font-semibold">
-                  {route.schedules.length} Flights
-                </div>
-              </div>
-
-              {/* airports */}
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                <div className="bg-slate-50 rounded-md p-4">
-                  <div className="flex items-center gap-2 text-slate-500 text-sm mb-2">
-                    <MapPin className="w-4 h-4" />
-
-                    Departure
-                  </div>
-
-                  <div className="font-bold text-slate-900">
-                    {
-                      route.departureAirport
-                        ?.name
-                    }
-                  </div>
-
-                  <div className="text-sm text-slate-500 mt-1">
-                    {
-                      route.departureAirport
-                        ?.country
-                    }
-                  </div>
-                </div>
-
-                <div className="bg-slate-50 rounded-md p-4">
-                  <div className="flex items-center gap-2 text-slate-500 text-sm mb-2">
-                    <MapPin className="w-4 h-4" />
-
-                    Arrival
-                  </div>
-
-                  <div className="font-bold text-slate-900">
-                    {
-                      route.arrivalAirport
-                        ?.name
-                    }
-                  </div>
-
-                  <div className="text-sm text-slate-500 mt-1">
-                    {
-                      route.arrivalAirport
-                        ?.country
-                    }
-                  </div>
-                </div>
-              </div>
-
-              {/* schedules */}
-              <div className="mt-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <CalendarDays className="w-4 h-4 text-primary" />
-
-                  <h3 className="font-semibold text-slate-800">
-                    Available Schedules
-                  </h3>
-                </div>
-
-                <div className="space-y-3">
-                  {route.schedules.map(
-                    (schedule) => (
-                      <div
-                        key={schedule.id}
-                        className="border border-slate-100 rounded-md p-4 hover:border-primary/20 transition-all"
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <div className="font-bold text-slate-900">
-                              {
-                                schedule.flight_number
-                              }
-                            </div>
-
-                            <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
-                              <Clock3 className="w-4 h-4" />
-
-                              {
-                                schedule.departure_time
-                              }{' '}
-                              -{' '}
-                              {
-                                schedule.arrival_time
-                              }
-                            </div>
-                          </div>
-
-                          <div className="text-right">
-                            <div className="text-xs text-slate-400 mb-1">
-                              Operating Days
-                            </div>
-
-                            <div className="flex flex-wrap justify-end gap-1">
-                              {schedule.operating_days_labels.map((day) => (
-                                  <span
-                                    key={
-                                      schedule.id +
-                                      day
-                                    }
-                                    className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-semibold"
-                                  >
+                    <div className="font-semibold text-slate-900">{route.departureAirport?.name}</div>
+                    <div className="text-xs text-slate-500">
+                      {route.departureAirport?.city}, {route.departureAirport?.country}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-1.5 text-slate-400 text-[11px] mb-1">
+                      <MapPin className="w-3.5 h-3.5" /> Arrival
+                    </div>
+                    <div className="font-semibold text-slate-900">{route.arrivalAirport?.name}</div>
+                    <div className="text-xs text-slate-500">
+                      {route.arrivalAirport?.city}, {route.arrivalAirport?.country}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <table className="w-full text-xs">
+                      <tbody className="divide-y divide-slate-50">
+                        {route.schedules.map((schedule) => (
+                          <tr key={schedule.id}>
+                            <td className="py-1.5 pr-3 font-bold text-slate-900 whitespace-nowrap">{schedule.flight_number}</td>
+                            <td className="py-1.5 pr-3 text-slate-500 whitespace-nowrap">
+                              <Clock3 className="inline w-3 h-3 mr-1" />
+                              {schedule.departure_time} - {schedule.arrival_time}
+                            </td>
+                            <td className="py-1.5">
+                              <div className="flex flex-wrap gap-1">
+                                {schedule.operating_days_labels.map((day) => (
+                                  <span key={schedule.id + day} className="px-1.5 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-semibold">
                                     {day}
                                   </span>
                                 ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </td>
+                  <td className="px-6 py-4 text-right whitespace-nowrap">
+                    <span className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded text-sm font-semibold">
+                      {route.schedules.length}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

@@ -10,6 +10,7 @@ import { showErrorAlert, showSuccessAlert } from '../../utils/alerts';
 import ScaleIn from '../../components/animations/ScaleIn';
 import { checkinsApi } from '../../services/api-services';
 import type { Checkin, BoardingPass } from '../../types/api';
+import DetailTable from '../../components/common/DetailTable';
 
 /**
  * ⚠️ Backend reality: checkin's only endpoints are POST /checkin
@@ -102,19 +103,21 @@ const CheckinPage = () => {
 
         {checkinResult && (
           <ScaleIn>
-          <div className="mt-4 p-6 bg-emerald-50/50 border border-emerald-100 rounded-md">
-            <div className="flex items-center gap-2 mb-4 text-emerald-700">
+          <div className="mt-4">
+            <div className="flex items-center gap-2 mb-3 text-emerald-700">
               <CheckCircle2 className="w-5 h-5" />
               <h3 className="font-bold">Checked in: {checkinResult.passenger_name}</h3>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div><span className="text-slate-500">Booking code</span><div className="font-bold text-slate-900">{checkinResult.booking_code}</div></div>
-              <div><span className="text-slate-500">Flight</span><div className="font-bold text-slate-900">{checkinResult.flight_number}</div></div>
-              <div><span className="text-slate-500">Seat</span><div className="font-bold text-slate-900">{checkinResult.seat_number}</div></div>
-              <div><span className="text-slate-500">Gate</span><div className="font-bold text-slate-900">{checkinResult.gate}</div></div>
-              <div><span className="text-slate-500">Boarding pass #</span><div className="font-bold text-slate-900">{checkinResult.boarding_pass_number}</div></div>
-              <div><span className="text-slate-500">Boarding time</span><div className="font-bold text-slate-900">{checkinResult.boarding_time}</div></div>
-            </div>
+            <DetailTable
+              rows={[
+                { label: 'Booking code', value: checkinResult.booking_code },
+                { label: 'Flight', value: checkinResult.flight_number },
+                { label: 'Seat', value: checkinResult.seat_number },
+                { label: 'Gate', value: checkinResult.gate },
+                { label: 'Boarding pass #', value: checkinResult.boarding_pass_number },
+                { label: 'Boarding time', value: checkinResult.boarding_time },
+              ]}
+            />
           </div>
           </ScaleIn>
         )}
@@ -149,13 +152,17 @@ const CheckinPage = () => {
 
         {boardingPass && (
           <ScaleIn>
-          <div className="mt-4 p-6 bg-slate-50 rounded-md grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div><span className="text-slate-500">Boarding pass #</span><div className="font-bold text-slate-900">{boardingPass.BoardingPassNumber}</div></div>
-            <div><span className="text-slate-500">Group</span><div className="font-bold text-slate-900">{boardingPass.BoardingGroup}</div></div>
-            <div><span className="text-slate-500">Gate</span><div className="font-bold text-slate-900">{boardingPass.Gate}</div></div>
-            <div><span className="text-slate-500">Status</span><div className="font-bold text-slate-900">{boardingPass.Status}</div></div>
-            <div><span className="text-slate-500">Boarding time</span><div className="font-bold text-slate-900">{boardingPass.BoardingTime ?? '-'}</div></div>
-            <div><span className="text-slate-500">Baggage count</span><div className="font-bold text-slate-900">{boardingPass.BaggageCount}</div></div>
+          <div className="mt-4">
+            <DetailTable
+              rows={[
+                { label: 'Boarding pass #', value: boardingPass.BoardingPassNumber },
+                { label: 'Group', value: boardingPass.BoardingGroup },
+                { label: 'Gate', value: boardingPass.Gate },
+                { label: 'Status', value: boardingPass.Status },
+                { label: 'Boarding time', value: boardingPass.BoardingTime ?? '-' },
+                { label: 'Baggage count', value: boardingPass.BaggageCount },
+              ]}
+            />
           </div>
           </ScaleIn>
         )}

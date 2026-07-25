@@ -15,6 +15,7 @@ import {
   Map,
   ClipboardCheck,
   FileText,
+  BarChart3,
   Bell,
   Settings,
   ChevronsLeft,
@@ -87,8 +88,8 @@ const navigation = [
         icon: PlaneLanding,
       },
       {
-        name: 'Baggage',
-        href: '/baggage',
+        name: 'Ancillary',
+        href: '/ancillary',
         icon: BaggageClaim,
       },
     ],
@@ -105,7 +106,7 @@ const navigation = [
       {
         name: 'Reports',
         href: '/reports',
-        icon: FileText,
+        icon: BarChart3,
       },
     ],
   },

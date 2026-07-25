@@ -327,29 +327,238 @@ export interface PaymentListResponse {
 }
 
 // ======================================================
-// BAGGAGE
+// ANCILLARY
 // ======================================================
 
-export interface Baggage {
-  id: string;
+/**
+ * Matches internal/ancillary's sqlc-generated Ancillary{Category,Price,
+ * Inventory}/BookingAncillary structs exactly, all serialized with real
+ * snake_case json tags (unlike CatalogItem below). Nullable
+ * pgtype.Text/Int8/Timestamptz fields marshal to `string|number|null`,
+ * not the pgx wrapper object -- confirmed against pgx v5.6.0's
+ * MarshalJSON for Text/Int8/Timestamptz/Numeric (all bare
+ * value-or-null, never an object).
+ */
+export interface AncillaryCategory {
+  id: number;
+  code: string;
+  name: string;
+  description: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
-  passenger_id: string;
-  segment_id: string;
+/** The raw catalog item row (as returned by create/update/delete). For
+ * the browsable listing with price attached, see CatalogItem -- that's
+ * a *different*, PascalCase shape (Service.ListCatalog has no json
+ * tags, so Go serializes Go field names verbatim). */
+export interface AncillaryItem {
+  id: number;
+  category_id: number;
+  code: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
-  weight: number;
+/**
+ * ⚠️ Service.ListCatalog's CatalogItem struct (internal/ancillary/
+ * application/query/service.go) has NO json struct tags -- same root
+ * cause as PaymentView -- so these fields are PascalCase on the wire,
+ * not snake_case. CurrentPrice is a decimal STRING (built with
+ * fmt.Sprintf, not pgtype's numeric marshal) and is null/omitted when
+ * the ancillary has no price configured yet -- that's a valid state,
+ * not an error.
+ */
+export interface CatalogItem {
+  ID: number;
+  CategoryID: number;
+  Code: string;
+  Name: string;
+  Description: string;
+  IsActive: boolean;
+  CurrentPrice?: string | null;
+  Currency?: string;
+}
 
-  tag_number: string;
+export interface AncillaryPrice {
+  id: number;
+  ancillary_id: number;
+  currency: string;
+  amount: number;
+  effective_from: string;
+  effective_until: string | null;
+  created_at: string;
+}
 
+export interface AncillaryInventory {
+  id: number;
+  ancillary_id: number;
+  flight_id: number;
+  available_quantity: number;
+  created_at: string;
+}
+
+/** booking_ancillaries row -- a purchased ancillary. */
+export interface AncillaryPurchase {
+  id: number;
+  pnr_id: number;
+  passenger_id: number | null;
+  segment_id: number | null;
+  ancillary_id: number;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  status: 'ACTIVE' | 'CANCELLED' | 'USED' | string;
+  purchased_at: string;
+  created_at: string;
+  payment_status: 'UNPAID' | 'PAID' | string;
+  payment_id: number | null;
+}
+
+/** Shape of GET /ancillaries and GET /ancillaries/categories --
+ * map[string]any{"items","total","page","limit"} from catalog_handler.go,
+ * lowercase, NOT the PascalCase ListResponse<T> used elsewhere. */
+export interface AncillaryListResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+// ======================================================
+// REPORT
+// ======================================================
+
+/**
+ * Matches internal/report/application/query's response DTOs exactly
+ * (all snake_case json tags, hand-written structs -- not sqlc/pgtype,
+ * so no nullability surprises here). Every report takes an optional
+ * from/to (YYYY-MM-DD, inclusive); omitted defaults to the last 30 days
+ * server-side, capped at 366 days.
+ */
+export interface ReportDateRange {
+  from: string;
+  to: string;
+}
+
+export interface ReportStatusCount {
   status: string;
+  count: number;
 }
 
-export interface BaggageListResponse {
-  items: Baggage[];
-  meta: PaginationMeta;
+export interface ReportStatusCountAmount {
+  status: string;
+  count: number;
+  amount: number;
 }
 
-// ======================================================
-// CHECKIN
+export interface ReportMethodCountAmount {
+  method: string;
+  count: number;
+  amount: number;
+}
+
+export interface ReportDailyCountRevenuePoint {
+  date: string;
+  count: number;
+  revenue: number;
+}
+
+export interface ReportDailyCountPoint {
+  date: string;
+  count: number;
+}
+
+export interface ReportDailyAmountPoint {
+  date: string;
+  amount: number;
+}
+
+export interface ReportCategoryRevenue {
+  category_code: string;
+  category_name: string;
+  count: number;
+  revenue: number;
+}
+
+export interface ReportTopAncillary {
+  ancillary_code: string;
+  ancillary_name: string;
+  category_name: string;
+  quantity: number;
+  revenue: number;
+}
+
+export interface BookingsReport {
+  period: ReportDateRange;
+  total_bookings: number;
+  paid_bookings: number;
+  total_revenue: number;
+  by_status: ReportStatusCount[];
+  daily_trend: ReportDailyCountRevenuePoint[];
+}
+
+export interface CheckinsReport {
+  period: ReportDateRange;
+  total_checkins: number;
+  total_baggage_count: number;
+  total_baggage_kg: number;
+  daily_trend: ReportDailyCountPoint[];
+}
+
+export interface PaymentsReport {
+  period: ReportDateRange;
+  total_payments: number;
+  paid_payments: number;
+  total_paid: number;
+  total_refunded: number;
+  refunded_count: number;
+  by_status: ReportStatusCountAmount[];
+  by_method: ReportMethodCountAmount[];
+  daily_trend: ReportDailyAmountPoint[];
+}
+
+export interface AncillariesReport {
+  period: ReportDateRange;
+  total_purchases: number;
+  total_units: number;
+  total_revenue: number;
+  cancelled_count: number;
+  by_category: ReportCategoryRevenue[];
+  top_ancillaries: ReportTopAncillary[];
+  daily_trend: ReportDailyAmountPoint[];
+}
+
+export interface ReportOverview {
+  period: ReportDateRange;
+  bookings: {
+    total: number;
+    paid: number;
+    revenue: number;
+    by_status: ReportStatusCount[];
+  };
+  checkins: {
+    total: number;
+    total_baggage_count: number;
+    total_baggage_kg: number;
+  };
+  payments: {
+    total: number;
+    paid: number;
+    total_paid: number;
+    total_refunded: number;
+    by_status: ReportStatusCountAmount[];
+  };
+  ancillaries: {
+    total_purchases: number;
+    total_revenue: number;
+    top_ancillaries: ReportTopAncillary[];
+  };
+  net_revenue: number;
+}
 // ======================================================
 
 /**

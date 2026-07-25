@@ -6,6 +6,7 @@ import {
   showErrorAlert,
 } from '../../utils/alerts';
 import { Plus, ShieldAlert, Power, PowerOff, Lock } from 'lucide-react';
+import DetailTable from '../../components/common/DetailTable';
 
 /**
  * ⚠️ Backend reality: pss_modular_cqrs's auth module has no GET /users
@@ -103,14 +104,17 @@ const UsersPage = () => {
 
       {lastUser && (
         <div className="premium-card p-6">
-          <h2 className="text-lg font-bold text-slate-900 mb-2">Last Created/Updated User</h2>
-          <pre className="text-xs bg-slate-50 rounded p-4 overflow-x-auto">
-            {JSON.stringify(
-              { id: lastUser.id, username: lastUser.username, full_name: lastUser.full_name, email: lastUser.email, role_id: lastUser.role_id, status: lastUser.status },
-              null,
-              2,
-            )}
-          </pre>
+          <h2 className="text-lg font-bold text-slate-900 mb-4">Last Created/Updated User</h2>
+          <DetailTable
+            rows={[
+              { label: 'ID', value: lastUser.id },
+              { label: 'Username', value: lastUser.username },
+              { label: 'Full Name', value: lastUser.full_name },
+              { label: 'Email', value: lastUser.email },
+              { label: 'Role ID', value: lastUser.role_id },
+              { label: 'Status', value: lastUser.status },
+            ]}
+          />
         </div>
       )}
 

@@ -13,6 +13,7 @@ import {
 
 import { bookingsApi } from '../../services/api-services/booking';
 import ScaleIn from '../../components/animations/ScaleIn';
+import DetailTable from '../../components/common/DetailTable';
 
 import type { PNR } from '../../types/api';
 
@@ -136,24 +137,14 @@ const BookingPage = () => {
             <CheckCircle2 className="w-6 h-6 text-emerald-500" />
             <h2 className="text-lg font-bold text-slate-900">Booking Created</h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-slate-50 rounded-md p-4">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Booking Code</p>
-              <h4 className="text-lg font-bold text-slate-900 mt-2">{result.BookingCode}</h4>
-            </div>
-            <div className="bg-slate-50 rounded-md p-4">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">PNR ID</p>
-              <h4 className="text-lg font-bold text-slate-900 mt-2">{result.PNRID}</h4>
-            </div>
-            <div className="bg-slate-50 rounded-md p-4">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</p>
-              <h4 className="text-lg font-bold text-slate-900 mt-2">{result.Status}</h4>
-            </div>
-            <div className="bg-slate-50 rounded-md p-4">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Total</p>
-              <h4 className="text-lg font-bold text-slate-900 mt-2">{result.Currency} {result.TotalAmount}</h4>
-            </div>
-          </div>
+          <DetailTable
+            rows={[
+              { label: 'Booking Code', value: result.BookingCode },
+              { label: 'PNR ID', value: result.PNRID },
+              { label: 'Status', value: result.Status },
+              { label: 'Total', value: `${result.Currency} ${result.TotalAmount}` },
+            ]}
+          />
         </div>
         </ScaleIn>
       )}

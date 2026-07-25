@@ -16,7 +16,8 @@ import PageTransition from './components/animations/PageTransition';
 import BookingPage from './pages/Booking/BookingPage';
 import CheckinPage from './pages/Booking/CheckinPage';
 import BoardingPassPage from './pages/Booking/BoardingPassPage';
-import BaggagePage from './pages/Booking/BaggagePage';
+import AncillaryPage from './pages/Booking/AncillaryPage';
+import ReportPage from './pages/Reports/ReportPage';
 
 const App = () => {
 const { isAuthenticated } = useAuthStore();
@@ -40,7 +41,8 @@ console.log('AUTH:', isAuthenticated);
           <Route path="/bookings" element={<PageTransition><BookingPage /></PageTransition>} />
           <Route path="/check-in" element={<PageTransition><CheckinPage /></PageTransition>} />
           <Route path="/boarding-pass" element={<PageTransition><BoardingPassPage /></PageTransition>} />
-          <Route path="/baggage" element={<PageTransition><BaggagePage /></PageTransition>} />
+          <Route path="/ancillary" element={<PageTransition><AncillaryPage /></PageTransition>} />
+          <Route path="/reports" element={<PageTransition><ReportPage /></PageTransition>} />
         </Route>
         <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
       </Routes>

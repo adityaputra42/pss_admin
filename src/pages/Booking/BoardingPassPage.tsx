@@ -5,6 +5,7 @@ import { showErrorAlert } from '../../utils/alerts';
 import ScaleIn from '../../components/animations/ScaleIn';
 import { boardingPassApi } from '../../services/api-services';
 import type { BoardingPass } from '../../types/api';
+import DetailTable from '../../components/common/DetailTable';
 
 /**
  * ⚠️ Backend reality: there is no separate boarding-pass module, list, or
@@ -88,24 +89,17 @@ const BoardingPassPage = () => {
                 <p className="text-sm text-slate-500">Group {pass.BoardingGroup} · Gate {pass.Gate}</p>
               </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-slate-50 rounded-md p-4">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Status</p>
-                <h4 className="text-lg font-bold text-slate-900 mt-2">{pass.Status}</h4>
-              </div>
-              <div className="bg-slate-50 rounded-md p-4">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Boarding Time</p>
-                <h4 className="text-lg font-bold text-slate-900 mt-2">{pass.BoardingTime ?? '-'}</h4>
-              </div>
-              <div className="bg-slate-50 rounded-md p-4">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Baggage Count</p>
-                <h4 className="text-lg font-bold text-slate-900 mt-2">{pass.BaggageCount}</h4>
-              </div>
-              <div className="bg-slate-50 rounded-md p-4">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Checked In At</p>
-                <h4 className="text-sm font-bold text-slate-900 mt-2">{pass.CheckedInAt}</h4>
-              </div>
-            </div>
+            <DetailTable
+              rows={[
+                { label: 'Boarding Pass #', value: pass.BoardingPassNumber },
+                { label: 'Group', value: pass.BoardingGroup },
+                { label: 'Gate', value: pass.Gate },
+                { label: 'Status', value: pass.Status },
+                { label: 'Boarding Time', value: pass.BoardingTime ?? '-' },
+                { label: 'Baggage Count', value: pass.BaggageCount },
+                { label: 'Checked In At', value: pass.CheckedInAt },
+              ]}
+            />
           </div>
           </ScaleIn>
         ) : (
