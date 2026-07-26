@@ -17,14 +17,7 @@ import DetailTable from '../../components/common/DetailTable';
 
 import type { PNR } from '../../types/api';
 
-/**
- * ⚠️ Backend reality: booking's only HTTP endpoint is POST /bookings/pnrs
- * (see booking.ts). There is no list/detail/cancel -- this page is a
- * quick single-passenger, single-segment booking form, not a bookings
- * table. flight_id/fare_class_id/flight_seat_id have to be known ahead
- * of time (e.g. from the Flights or Flight Schedules page) since there's
- * no picker wired up here yet.
- */
+
 const BookingPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<PNR | null>(null);

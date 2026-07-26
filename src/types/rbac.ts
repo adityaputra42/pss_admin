@@ -1,19 +1,24 @@
-import type { ReactNode } from "react";
-
-export interface Role {
-  permissions: Permission[];
-  created_at: string | number | Date;
-  is_system_role: any;
-  id: number;
-  level:number;
-  name: string;
-  description: string;
-}
 
 export interface Permission {
-  description: ReactNode;
   id: number;
-  name: string;
+  module: string;
   resource: string;
   action: string;
+  description: string | null;
+}
+
+export interface Role {
+  id: number;
+  name: string;
+  description: string | null;
+  level: number;
+  is_system_role: boolean;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  user_count: number;
+}
+
+export interface RoleDetail extends Role {
+  permissions: Permission[];
 }

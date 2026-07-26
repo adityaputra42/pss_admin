@@ -19,7 +19,7 @@ export const usePermissions = () => {
 
       try {
         const data = await rolesApi.getAllPermissions();
-        setPermissions(data ?? []);
+        setPermissions(data.items ?? []);
       } catch (err) {
         console.error(err);
         setError('Failed to fetch permissions');

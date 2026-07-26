@@ -72,9 +72,7 @@ export const useDashboardData = () => {
             ? recentBookingsRes.value ?? []
             : [],
 
-        // ⚠️ Always empty: pss_modular_cqrs's dashboard module has no
-        // "operational alerts" endpoint. See dashboard.ts.
-        alerts: [],
+          alerts: [],
 
         isLoading: false,
         error: null,

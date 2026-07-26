@@ -2,7 +2,7 @@
 // GENERIC API
 // ======================================================
 
-import type { Role } from "./rbac";
+import type { Role, Permission, RoleDetail } from "./rbac";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -27,30 +27,30 @@ export interface PaginationMeta {
 // ROLE
 // ======================================================
 
+/** POST /roles body. is_system_role/is_active aren't accepted here --
+ * every role created through the API is non-system and active
+ * (RoleCommandService.CreateRole). */
 export interface RoleInput {
   name: string;
-
   description?: string;
-
   level: number;
-
-  permission_ids?: number[];
 }
 
+/** PUT /roles/{id} body. name is immutable (never accepted on update).
+ * For system roles, level/is_active are REJECTED server-side (422) --
+ * only description can change. See RoleCommandService.UpdateRole. */
 export interface RoleUpdateInput {
-  name?: string;
-
   description?: string;
-
   level?: number;
-
-  permission_ids?: number[];
+  is_active?: boolean;
 }
 
 // ======================================================
 // ASSIGN PERMISSION
 // ======================================================
 
+/** PUT /roles/{id}/permissions body. This REPLACES the role's entire
+ * permission set -- send the full desired list every time, not a diff. */
 export interface AssignPermissionsInput {
   permission_ids: number[];
 }
@@ -61,15 +61,19 @@ export interface AssignPermissionsInput {
 
 export interface RoleListResponse {
   items: Role[];
-
   total: number;
-
   page: number;
-
   limit: number;
-
-  total_pages: number;
 }
+
+export interface PermissionListResponse {
+  items: Permission[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export type RoleDetailResponse = RoleDetail;
 // ======================================================
 // USER
 // ======================================================
@@ -330,15 +334,7 @@ export interface PaymentListResponse {
 // ANCILLARY
 // ======================================================
 
-/**
- * Matches internal/ancillary's sqlc-generated Ancillary{Category,Price,
- * Inventory}/BookingAncillary structs exactly, all serialized with real
- * snake_case json tags (unlike CatalogItem below). Nullable
- * pgtype.Text/Int8/Timestamptz fields marshal to `string|number|null`,
- * not the pgx wrapper object -- confirmed against pgx v5.6.0's
- * MarshalJSON for Text/Int8/Timestamptz/Numeric (all bare
- * value-or-null, never an object).
- */
+
 export interface AncillaryCategory {
   id: number;
   code: string;
@@ -348,10 +344,6 @@ export interface AncillaryCategory {
   updated_at: string;
 }
 
-/** The raw catalog item row (as returned by create/update/delete). For
- * the browsable listing with price attached, see CatalogItem -- that's
- * a *different*, PascalCase shape (Service.ListCatalog has no json
- * tags, so Go serializes Go field names verbatim). */
 export interface AncillaryItem {
   id: number;
   category_id: number;
@@ -363,15 +355,6 @@ export interface AncillaryItem {
   updated_at: string;
 }
 
-/**
- * ⚠️ Service.ListCatalog's CatalogItem struct (internal/ancillary/
- * application/query/service.go) has NO json struct tags -- same root
- * cause as PaymentView -- so these fields are PascalCase on the wire,
- * not snake_case. CurrentPrice is a decimal STRING (built with
- * fmt.Sprintf, not pgtype's numeric marshal) and is null/omitted when
- * the ancillary has no price configured yet -- that's a valid state,
- * not an error.
- */
 export interface CatalogItem {
   ID: number;
   CategoryID: number;
@@ -401,7 +384,6 @@ export interface AncillaryInventory {
   created_at: string;
 }
 
-/** booking_ancillaries row -- a purchased ancillary. */
 export interface AncillaryPurchase {
   id: number;
   pnr_id: number;
@@ -418,9 +400,6 @@ export interface AncillaryPurchase {
   payment_id: number | null;
 }
 
-/** Shape of GET /ancillaries and GET /ancillaries/categories --
- * map[string]any{"items","total","page","limit"} from catalog_handler.go,
- * lowercase, NOT the PascalCase ListResponse<T> used elsewhere. */
 export interface AncillaryListResponse<T> {
   items: T[];
   total: number;
@@ -432,13 +411,6 @@ export interface AncillaryListResponse<T> {
 // REPORT
 // ======================================================
 
-/**
- * Matches internal/report/application/query's response DTOs exactly
- * (all snake_case json tags, hand-written structs -- not sqlc/pgtype,
- * so no nullability surprises here). Every report takes an optional
- * from/to (YYYY-MM-DD, inclusive); omitted defaults to the last 30 days
- * server-side, capped at 366 days.
- */
 export interface ReportDateRange {
   from: string;
   to: string;
@@ -561,10 +533,6 @@ export interface ReportOverview {
 }
 // ======================================================
 
-/**
- * Matches checkInResponse (internal/checkin/interfaces/http/
- * checkin_handler.go) -- this one DOES have proper snake_case json tags.
- */
 export interface Checkin {
   checkin_id: number;
   boarding_pass_number: string;
@@ -586,11 +554,6 @@ export interface CheckinListResponse {
 // BOARDING PASS
 // ======================================================
 
-/**
- * ⚠️ Matches BoardingPassView (internal/checkin/application/query/
- * boarding_pass_query.go) exactly -- PascalCase, no json tags, same
- * backend pattern as PaymentView/PNR/FlightSearchResult.
- */
 export interface BoardingPass {
   CheckinID: number;
   BoardingPassNumber: string;
