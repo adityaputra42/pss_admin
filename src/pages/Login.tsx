@@ -11,7 +11,7 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const { login, setPermissions } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,9 +20,20 @@ const LoginPage = () => {
 
     try {
       const data = await authApi.login({ email: username, password });
-      console.log('LOGIN RESPONSE:', data);
-      const { access_token, refresh_token, user } = data;
-      login(access_token, refresh_token, user);
+      const { access_token, refresh_token } = data;
+      useAuthStore.getState().setTokens(access_token, refresh_token);
+      const me = await authApi.getMe();
+      if (!me) throw new Error('Failed to load profile after login');
+
+      login(access_token, refresh_token, {
+        id: me.id,
+        username: me.username,
+        email: me.email,
+        full_name: me.full_name,
+        role_id: me.role_id,
+        status: me.status,
+      });
+      setPermissions(me);
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');

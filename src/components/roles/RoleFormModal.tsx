@@ -26,6 +26,13 @@ interface RoleFormModalProps {
   ) => Promise<void> | void;
 }
 
+/**
+ * ⚠️ name is only sent on create -- PUT /roles/{id} doesn't accept it
+ * (immutable, same convention as every other module's "code" field).
+ * For system roles (superadmin/admin/agent/customer), level and
+ * is_active are locked in this form AND rejected server-side (422) if
+ * sent anyway -- only description is editable for those four.
+ */
 const RoleFormModal: React.FC<RoleFormModalProps> = ({ isOpen, onClose, role, onSave }) => {
   const isSystemRole = !!role?.is_system_role;
 

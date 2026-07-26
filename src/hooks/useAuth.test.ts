@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('useAuthStore', () => {
   beforeEach(() => {
+ 
     useAuthStore.setState({
       accessToken: null,
       refreshToken: null,
@@ -12,7 +13,7 @@ describe('useAuthStore', () => {
       isAuthenticated: false,
       permissions: [],
     });
-    localStorage.clear();
+    localStorage.clear(); // Clear localStorage as well
   });
 
   it('should initialize with default values', () => {

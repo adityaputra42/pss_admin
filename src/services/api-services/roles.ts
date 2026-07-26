@@ -10,6 +10,7 @@ import type {
 import type { Role } from '../../types/rbac';
 import api from '../api-client';
 
+
 export const rolesApi = {
   async getRoles(page = 1, limit = 50): Promise<RoleListResponse> {
     const response = await api.get<ApiResponse<RoleListResponse>>('/roles', { params: { page, limit } });
@@ -21,22 +22,21 @@ export const rolesApi = {
     return response.data.data;
   },
 
-  /** Always creates a non-system, active role -- see RoleInput's doc comment. */
   async createRole(data: RoleInput): Promise<Role | null> {
     const response = await api.post<ApiResponse<Role>>('/roles', data);
     return response.data.data;
   },
-  async updateRole(id: number, data: RoleUpdateInput): Promise<Role | null> {
+
+   async updateRole(id: number, data: RoleUpdateInput): Promise<Role | null> {
     const response = await api.put<ApiResponse<Role>>(`/roles/${id}`, data);
     return response.data.data;
   },
 
-  /** Fails (422) for system roles, or any role still assigned to a user. */
   async deleteRole(id: number): Promise<void> {
     await api.delete(`/roles/${id}`);
   },
 
-  async replacePermissions(id: number, data: AssignPermissionsInput): Promise<RoleDetailResponse | null> {
+   async replacePermissions(id: number, data: AssignPermissionsInput): Promise<RoleDetailResponse | null> {
     const response = await api.put<ApiResponse<RoleDetailResponse>>(`/roles/${id}/permissions`, data);
     return response.data.data;
   },

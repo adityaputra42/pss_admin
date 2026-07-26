@@ -72,7 +72,7 @@ export const useDashboardData = () => {
             ? recentBookingsRes.value ?? []
             : [],
 
-          alerts: [],
+         alerts: [],
 
         isLoading: false,
         error: null,

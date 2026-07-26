@@ -17,7 +17,6 @@ import DetailTable from '../../components/common/DetailTable';
 
 import type { PNR } from '../../types/api';
 
-
 const BookingPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<PNR | null>(null);

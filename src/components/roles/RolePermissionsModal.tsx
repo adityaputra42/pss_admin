@@ -14,6 +14,7 @@ interface RolePermissionsModalProps {
   onSave: (permissionIds: number[]) => Promise<void> | void;
 }
 
+
 const RolePermissionsModal: React.FC<RolePermissionsModalProps> = ({
   isOpen,
   onClose,

@@ -25,6 +25,7 @@ import {
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Slide from '../animations/Slide';
+import { useAuthStore } from '../../hooks/useAuth';
 
 const navigation = [
   {
@@ -107,6 +108,7 @@ const navigation = [
         name: 'Reports',
         href: '/reports',
         icon: BarChart3,
+        requiredPermissions: [['report', 'report', 'view']],
       },
     ],
   },
@@ -118,11 +120,17 @@ const navigation = [
         name: 'Users',
         href: '/users',
         icon: Users,
+        requiredPermissions: [
+          ['user', 'account', 'create'],
+          ['user', 'account', 'update'],
+          ['user', 'account', 'status'],
+        ],
       },
       {
         name: 'Roles & Permissions',
         href: '/roles',
         icon: Shield,
+        requiredPermissions: [['role', 'role', 'view']],
       },
     ],
   },
@@ -147,7 +155,15 @@ const navigation = [
       },
     ],
   },
-];
+] satisfies Array<{
+  section: string;
+  items: Array<{
+    name: string;
+    href: string;
+    icon: React.ElementType;
+    requiredPermissions?: Array<[string, string, string]>;
+  }>;
+}>;
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -262,6 +278,20 @@ const SidebarContent = ({
   isCollapsed,
   onToggleCollapsed,
 }: SidebarContentProps) => {
+  const hasAnyPermission = useAuthStore((s) => s.hasAnyPermission);
+
+  // Hide items the current role has none of the required permissions
+  // for, then drop any section left with zero visible items so an
+  // empty "Finance" or "Administration" heading doesn't linger.
+  const visibleNavigation = navigation
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) => !item.requiredPermissions || hasAnyPermission(item.requiredPermissions),
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
+
   return (
     <>
       {/* HEADER */}
@@ -341,7 +371,7 @@ const SidebarContent = ({
       {/* NAVIGATION */}
       <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-5 custom-scrollbar">
         <div className="space-y-6">
-          {navigation.map((group, groupIndex) => (
+          {visibleNavigation.map((group, groupIndex) => (
             <div key={group.section}>
               {!isCollapsed && (
                 <Slide

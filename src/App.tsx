@@ -1,10 +1,12 @@
 import {  Routes, Route, Navigate} from 'react-router-dom';
+import { useEffect } from 'react';
 import LoginPage from './pages/Login';
 import DashboardPage from './pages/Dashboard';
 import UsersPage from './pages/Users/UsersPage';
 import RolesPage from './pages/Roles/RolesPage';
 import PaymentsPage from './pages/Payments/PaymentsPage';
 import { useAuthStore } from './hooks/useAuth';
+import { authApi } from './services/api-services';
 import ProtectedRoute from './guards/ProtectedRoute';
 import ProfilePage from './pages/Profile';
 import FlightsPage from './pages/FlightOperations/FlightsPage';
@@ -20,10 +22,14 @@ import AncillaryPage from './pages/Booking/AncillaryPage';
 import ReportPage from './pages/Reports/ReportPage';
 
 const App = () => {
-const { isAuthenticated } = useAuthStore();
-console.log('AUTH STATE:', isAuthenticated);
-console.log('CURRENT PATH:', window.location.pathname);
-console.log('AUTH:', isAuthenticated);
+const { isAuthenticated, setPermissions } = useAuthStore();
+useEffect(() => {
+  if (!isAuthenticated) return;
+  authApi.getMe().then((me) => {
+    if (me) setPermissions(me);
+  }).catch(() => {});
+ }, [isAuthenticated]);
+
   return (
       <Routes>
         <Route path="/login" element={!isAuthenticated ? <PageTransition> <LoginPage /></PageTransition> : <Navigate to="/dashboard" />} />
