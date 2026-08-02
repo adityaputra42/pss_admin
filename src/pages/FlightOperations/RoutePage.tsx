@@ -45,7 +45,7 @@ const RoutesPage = () => {
       const data =
         await flightSchedulesApi.getSchedules();
 
-      setSchedules(Array.isArray(data) ? data : []);
+      setSchedules(data.items ?? []);
     } catch (err: any) {
       setError(
         err?.response?.data?.message ||

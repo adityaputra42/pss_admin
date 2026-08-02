@@ -2,6 +2,8 @@ import api from '../api-client';
 
 import type {
   Flight,
+  FlightInput,
+  FlightUpdateInput,
   ApiResponse,
   FlightsResponse,
   FlightSearchResult,
@@ -10,28 +12,33 @@ import type {
 /**
  * Flight Instances API Service.
  *
- * ⚠️ BACKEND REALITY CHECK (internal/flight/interfaces/http/router.go,
- * all mounted under /flights):
- *   GET  /flights/search    (public flight search -- richer, joined-ish
+ * BACKEND (internal/flight/interfaces/http/router.go, all mounted under
+ * /flights):
+ *   GET  /flights/search           (public flight search -- richer, joined-ish
  *        result incl. fares, but PascalCase fields, see FlightSearchResult)
- *   GET  /flights/instances (list flight instances -- FLAT rows, only
+ *   GET  /flights/instances        (list flight instances -- FLAT rows, only
  *        schedule_id/aircraft_id, no route/aircraft/price/seat info)
  *   GET  /flights/instances/{id}
- *   POST /flights/schedules/{id}/generate-flights (the ONLY way flights
- *        get created -- there is no direct POST /flights)
+ *   POST /flights/schedules/{id}/generate-flights (bulk create, with
+ *        seats+fares, from a recurring schedule across a date range)
  *
- * There is NO PUT /flights/{id}, NO PATCH /flights/{id}/status, NO
- * DELETE /flights/{id}, and NO GET /flights/{id}/seat-map. A single
- * flight instance cannot be edited, status-changed, deleted, or seat-mapped
- * through this backend today -- those functions are removed below rather
- * than left pointing at endpoints that don't exist. If FlightsPage needs
- * any of them, they're new backend work, not a frontend fix.
+ * As of CreateFlightHandler/UpdateFlightHandler/DeleteFlightHandler,
+ * single flight instances are ALSO directly manageable:
+ *   POST   /flights/instances            permission: flight.flight.create
+ *   PUT    /flights/instances/{id}       permission: flight.flight.update
+ *   DELETE /flights/instances/{id}       permission: flight.flight.delete
+ *
+ * IMPORTANT: manual create does NOT generate flight_seats/flight_fares
+ * the way generate-flights does -- a manually created/edited flight has
+ * no bookable seats/prices unless those already existed (e.g. editing a
+ * flight that generate-flights produced). Use generate-flights to bring
+ * a new sellable flight into existence; use create/update/delete here to
+ * fix up or remove a bad instance.
  */
 export const flightsApi = {
   /**
    * List flight instances.
    * GET /flights/instances?page=&limit=&schedule_id=
-   * (This replaces the old, nonexistent GET /flights list.)
    */
   async getFlights(
     page: number = 1,
@@ -48,6 +55,39 @@ export const flightsApi = {
   async getFlightById(id: number): Promise<Flight | null> {
     const response = await api.get<ApiResponse<Flight>>(`/flights/instances/${id}`);
     return response.data.data;
+  },
+
+  /**
+   * POST /flights/instances -- manual single-instance create. All
+   * fields required except status (defaults SCHEDULED server-side).
+   * See the module-level note above: no seats/fares are created here.
+   */
+  async createFlight(payload: FlightInput): Promise<Flight | null> {
+    const response = await api.post<ApiResponse<Flight>>('/flights/instances', payload);
+    return response.data.data;
+  },
+
+  /**
+   * PUT /flights/instances/{id}. schedule_id is NOT editable (backend
+   * silently ignores it if sent -- see FlightUpdateInput's Omit). Send
+   * only the fields that changed; omitted fields keep their current
+   * value server-side (COALESCE on the SQL side).
+   */
+  async updateFlight(id: number, payload: FlightUpdateInput): Promise<Flight | null> {
+    const response = await api.put<ApiResponse<Flight>>(`/flights/instances/${id}`, payload);
+    return response.data.data;
+  },
+
+  /**
+   * DELETE /flights/instances/{id}. NOTE: if this flight already has
+   * flight_seats/flight_fares/bookings referencing it and those FKs
+   * aren't ON DELETE CASCADE, the delete will fail server-side with a
+   * raw foreign-key violation (500, not a friendly 409) -- see
+   * DeleteFlightHandler's comment. Safe for a flight that was created
+   * manually and never booked.
+   */
+  async deleteFlight(id: number): Promise<void> {
+    await api.delete(`/flights/instances/${id}`);
   },
 
   /**

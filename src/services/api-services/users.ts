@@ -4,29 +4,49 @@ import type {
   User,
   UserInput,
   UserUpdateInput,
+  UserListResult,
   ApiResponse,
 } from '../../types/api';
 
 /**
  * Users API Service — Passenger Service System Admin User Management.
  *
- * ⚠️ BACKEND REALITY CHECK (internal/auth/interfaces/http/router.go):
- * the auth module only exposes FOUR user-management endpoints, total:
- *   POST   /auth/register           (permission: user.account.create)
- *   PUT    /auth/users/{id}         (permission: user.account.update)
- *   PATCH  /auth/users/{id}/status  (permission: user.account.status)
- *   PUT    /auth/me                 (self-service, any authenticated user)
+ * BACKEND (internal/auth/interfaces/http/router.go):
+ *   POST   /auth/register           permission: user.account.create
+ *   GET    /auth/users              permission: user.account.view   (list, admin)
+ *   GET    /auth/users/{id}         permission: user.account.view   (get, admin)
+ *   PUT    /auth/users/{id}         permission: user.account.update
+ *   PATCH  /auth/users/{id}/status  permission: user.account.status
+ *   PUT    /auth/me                 self-service, any authenticated user
  *
- * There is NO GET /users (list), NO GET /users/{id}, NO DELETE /users/{id},
- * NO /users/{id}/activate|deactivate (status changes go through the one
- * generic /status endpoint with a status string), NO /users/bulk, and NO
- * /profile or /profile/password endpoints at all. A user list/detail page
- * cannot be built against this backend today without new read endpoints
- * being added there first -- this file does NOT paper over that with fake
- * data; functions with no backend counterpart are removed below, not kept
- * pointing at a 404.
+ * List/Get were added alongside ListUsersHandler/GetUserHandler --
+ * GetUserHandler itself existed earlier (used internally by /me) but
+ * wasn't reachable for any user other than the caller until now.
+ *
+ * Still NO DELETE /users/{id} and NO hard-delete of any kind -- status
+ * ("ACTIVE" | "LOCKED" | "INACTIVE") is the deliberate soft-delete
+ * mechanism, since a user row is referenced by booking_history, and hard
+ * deleting it would break that trail. Use setUserStatus('INACTIVE') for
+ * "remove this user", not a DELETE call that doesn't exist.
  */
 export const usersApi = {
+  /**
+   * List users (admin).
+   * GET /auth/users?page=&limit=
+   */
+  async getUsers(page: number = 1, limit: number = 10): Promise<UserListResult> {
+    const response = await api.get<ApiResponse<UserListResult>>('/auth/users', {
+      params: { page, limit },
+    });
+    return response.data.data ?? { items: [], total: 0, page: 1, limit: 10 };
+  },
+
+  /** GET /auth/users/{id} (admin) */
+  async getUserById(id: number): Promise<User | null> {
+    const response = await api.get<ApiResponse<User>>(`/auth/users/${id}`);
+    return response.data.data;
+  },
+
   /**
    * Create user.
    * POST /auth/register

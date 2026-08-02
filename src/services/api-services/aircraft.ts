@@ -13,7 +13,7 @@ import api from '../api-client';
 export const aircraftsApi = {
   async getAircrafts(): Promise<ListResponse<Aircraft>> {
     const response = await api.get<ApiResponse<ListResponse<Aircraft>>>('/flights/aircrafts');
-    return response.data.data ?? [];
+    return response.data.data ?? { Items: [], Total: 0 };
   },
 
   async getAircraftById(id: number): Promise<Aircraft | null> {

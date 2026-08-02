@@ -10,6 +10,8 @@ export { flightSchedulesApi } from './flightSchedule';
 export { paymentsApi } from './payments';
 export { aircraftsApi } from './aircraft';
 export { airportsApi } from './airport';
+export { seatClassesApi } from './seatClass';
+export { fareClassesApi } from './fareClass';
 export { ancillaryApi } from './ancillary';
 export { reportApi } from './report';
 export { rolesApi } from './roles';

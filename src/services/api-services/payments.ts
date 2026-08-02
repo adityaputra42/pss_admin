@@ -5,27 +5,27 @@
 import type {
   ApiResponse,
   Payment,
+  PaymentListResult,
 } from '../../types/api';
 import api from '../api-client';
 
 /**
- * ⚠️ BACKEND REALITY CHECK (internal/payment/interfaces/http/router.go):
- *   POST /payments             (open a DOKU Virtual Account for a PNR)
+ * BACKEND (internal/payment/interfaces/http/router.go):
+ *   POST /payments                (open a DOKU Virtual Account for a PNR)
  *   GET  /payments/{id}
- *   GET  /payments/pnr/{pnr_id} (latest payment for a PNR)
+ *   GET  /payments/pnr/{pnr_id}   (latest payment for a PNR)
+ *   GET  /payments                permission: payment.payment.view (admin, list all)
  * plus two DOKU webhook endpoints not relevant to an admin UI.
  *
- * There is NO GET /payments (list all) and NO refund endpoint of any
- * kind -- DOKU's VA product this integrates with has no refund flow, see
- * infrastructure/doku/client.go's package comment. getPayments() and
- * refundPayment() are removed below; an admin "all payments" table isn't
- * buildable against this backend without a new list endpoint, and refund
- * isn't a feature that exists at all yet.
+ * GET /payments (list) was added alongside the other three -- admin
+ * visibility across all PNRs, not gated by PNR ownership the way the
+ * other three routes are (see platformauthz.CheckOwnership on those).
  *
- * Note also: both remaining reads are now ownership-gated server-side
- * (403 if the PNR belongs to a different logged-in user) -- see
- * platformauthz.CheckOwnership. As an admin caller this only matters if
- * you're testing with a non-admin token.
+ * There is still NO refund endpoint of any kind -- DOKU's VA product
+ * this integrates with has no refund flow (see infrastructure/doku/
+ * client.go's package comment). refundPayment() is not something this
+ * file can add without new backend work; don't build a refund button
+ * against this API.
  */
 export const paymentsApi = {
   /** GET /payments/{id} */
@@ -38,6 +38,27 @@ export const paymentsApi = {
   async getPaymentByPNR(pnrId: number): Promise<Payment | null> {
     const response = await api.get<ApiResponse<Payment>>(`/payments/pnr/${pnrId}`);
     return response.data.data;
+  },
+
+  /**
+   * List payments (admin), across all PNRs.
+   * GET /payments?page=&limit=&status=
+   * status is optional (e.g. "PENDING", "PAID", "FAILED", "EXPIRED",
+   * "REFUNDED"); omit for all statuses.
+   */
+  async getPayments(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+  }): Promise<PaymentListResult> {
+    const response = await api.get<ApiResponse<PaymentListResult>>('/payments', {
+      params: {
+        page: params?.page ?? 1,
+        limit: params?.limit ?? 10,
+        status: params?.status || undefined,
+      },
+    });
+    return response.data.data ?? { items: [], total: 0, page: 1, limit: 10 };
   },
 
   /**

@@ -143,9 +143,18 @@ export interface PasswordUpdateInput {
   confirm_password: string;
 }
 
-export interface UserListResponse {
+/**
+ * GET /auth/users (admin list) response -- internal/auth/application/
+ * query/list_users.go's ListUsersResult, real snake_case json tags.
+ * Was previously a guess (UserListResponse w/ `meta`) before this
+ * endpoint existed; corrected to match what ListUsersHandler actually
+ * returns: flat items/total/page/limit, no nested meta object.
+ */
+export interface UserListResult {
   items: User[];
-  meta: PaginationMeta;
+  total: number;
+  page: number;
+  limit: number;
 }
 
 // ======================================================
@@ -197,6 +206,71 @@ export interface AircraftListResponse {
 }
 
 // ======================================================
+// SEAT CLASS
+// ======================================================
+// Matches querydb.SeatClass exactly (internal/flight/persistence/
+// postgres/sqlc/query/models.go) -- real snake_case json tags, same
+// convention as Airport/Aircraft above (unlike FlightSearchResult/PNR/
+// Payment elsewhere in this file, which are PascalCase).
+
+export interface SeatClass {
+  id: number;
+  code: string;
+  name: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface SeatClassInput {
+  code: string;
+  name: string;
+}
+
+/** PUT /flights/seat-classes/{id} only accepts name -- code is immutable after creation, same convention as Aircraft.registration_number. */
+export type SeatClassUpdateInput = Partial<Pick<SeatClassInput, 'name'>>;
+
+/**
+ * GET /flights/seat-classes and GET /flights/fare-classes go through
+ * MasterDataQueryService, same as Airport/Aircraft -- ListResult<T> has
+ * NO json tags, so it serializes as capitalized {Items, Total}, not
+ * {items, total}. Reuse the existing ListResponse<T> type (already
+ * capitalized) instead of the lowercase *ListResponse ones below.
+ */
+
+// ======================================================
+// FARE CLASS
+// ======================================================
+// Matches querydb.FareClass exactly. seat_class_id links to SeatClass
+// above; there is no embedded seat_class object, cross-reference by id
+// the same way FlightsPage does for schedule_id/aircraft_id.
+
+export interface FareClass {
+  id: number;
+  code: string;
+  name: string;
+  seat_class_id: number;
+  refundable: boolean;
+  rescheduleable: boolean;
+  baggage_kg: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface FareClassInput {
+  code: string;
+  name: string;
+  seat_class_id: number;
+  refundable: boolean;
+  rescheduleable: boolean;
+  baggage_kg: number;
+}
+
+/** PUT /flights/fare-classes/{id} -- code and seat_class_id are NOT editable (create a new fare class instead if either needs to change). */
+export type FareClassUpdateInput = Partial<
+  Pick<FareClassInput, 'name' | 'refundable' | 'rescheduleable' | 'baggage_kg'>
+>;
+
+// ======================================================
 // FLIGHT SCHEDULE
 // ======================================================
 
@@ -237,7 +311,7 @@ export interface FlightScheduleListResponse {
 // ======================================================
 // FLIGHT INSTANCE
 //
-// ⚠️ Matches the REAL, flat querydb.Flight row (see
+// Matches the REAL, flat querydb.Flight row (see
 // internal/flight/persistence/postgres/sqlc/query/models.go) --
 // GET /flights/instances and GET /flights/instances/{id} return exactly
 // this, with only schedule_id/aircraft_id foreign keys, NOT joined
@@ -246,6 +320,15 @@ export interface FlightScheduleListResponse {
 // FlightsPage.tsx cross-references schedule_id/aircraft_id against
 // separately-fetched schedules/aircraft lists to show route/aircraft
 // names -- it's not embedded in this response.
+//
+// As of the CreateFlightHandler/UpdateFlightHandler/DeleteFlightHandler
+// addition, this row IS now directly create/update/delete-able via
+// POST|PUT|DELETE /flights/instances(/{id}) -- see flight.ts. Manual
+// create does NOT generate flight_seats/flight_fares the way
+// generate-flights does -- a manually created flight has no bookable
+// seats/prices until those are added separately. Use generate-flights
+// for a sellable flight; use manual create/update/delete for fixing up
+// or removing a bad instance.
 // ======================================================
 export interface Flight {
   id: number;
@@ -262,6 +345,27 @@ export interface FlightsResponse {
   items: Flight[];
   total: number;
 }
+
+/** POST /flights/instances body. All fields required; times are RFC3339 (e.g. "2026-08-15T09:00:00+07:00"), status optional (defaults SCHEDULED server-side). */
+export interface FlightInput {
+  schedule_id: number;
+  aircraft_id: number;
+  departure_time: string; // RFC3339
+  arrival_time: string; // RFC3339
+  status?: string;
+}
+
+/** PUT /flights/instances/{id} body -- schedule_id is NOT editable (see UpdateFlight's sqlc comment: delete + regenerate instead if the schedule itself is wrong). */
+export type FlightUpdateInput = Partial<Omit<FlightInput, 'schedule_id'>>;
+
+export const FLIGHT_STATUSES = [
+  'SCHEDULED',
+  'BOARDING',
+  'DEPARTED',
+  'ARRIVED',
+  'DELAYED',
+  'CANCELLED',
+] as const;
 
 /**
  * ⚠️ Shape of GET /flights/search results -- NOTE THE PascalCase FIELD
@@ -311,8 +415,7 @@ export interface Passenger {
  * ⚠️ Matches CreatePNRResult (internal/booking/application/command/
  * create_pnr.go) exactly -- PascalCase, no json tags, same backend
  * pattern as PaymentView/BoardingPassView/FlightSearchResult. This is
- * ONLY the create-response shape -- there is no GET endpoint that
- * returns a PNR in any shape at all (see booking.ts).
+ * ONLY the create-response shape.
  */
 export interface PNR {
   PNRID: number;
@@ -326,6 +429,52 @@ export interface PNR {
 export interface BookingListResponse {
   items: PNR[];
   meta: PaginationMeta;
+}
+
+/**
+ * GET /bookings/pnrs/{id} response -- matches bookingcontract.PNRInfo
+ * exactly (internal/booking/contract/pnr_query.go), same "no json tags"
+ * PascalCase convention as PNR/Payment above. Full detail incl. contact
+ * info; TotalAmount is a decimal string, not a number (avoids float
+ * rounding on money, same reasoning as Payment.Amount).
+ */
+export interface PNRDetail {
+  ID: number;
+  BookingCode: string;
+  Status: string; // HOLD, BOOKED, CANCELLED, EXPIRED
+  PaymentStatus: string; // UNPAID, PENDING, PAID, FAILED, EXPIRED, REFUNDED
+  TotalAmount: string;
+  Currency: string;
+  HoldExpiresAt: string | null; // null if not (or no longer) in HOLD
+  ContactName: string;
+  ContactEmail: string;
+  ContactPhone: string;
+  CreatedBy: number | null;
+}
+
+/**
+ * GET /bookings/pnrs (admin list) response. Unlike PNR/PNRDetail above,
+ * this one DOES have json tags (internal/booking/application/query/
+ * pnr_query_service.go's PNRSummary/ListPNRsResult) -- real snake_case,
+ * a deliberately lighter row (no contact fetch per row -- follow up
+ * with GET /bookings/pnrs/{id} for contact details on one PNR).
+ */
+export interface PNRSummary {
+  id: number;
+  booking_code: string;
+  status: string;
+  payment_status: string;
+  total_amount: string;
+  currency: string;
+  created_at: string;
+  expires_at?: string;
+}
+
+export interface PNRListResult {
+  items: PNRSummary[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 // ======================================================
@@ -354,6 +503,20 @@ export interface Payment {
 export interface PaymentListResponse {
   items: Payment[];
   meta: PaginationMeta;
+}
+
+/**
+ * GET /payments (admin, list across all PNRs) response. The wrapper
+ * (internal/payment/application/query's ListPaymentsResult) DOES have
+ * json tags -- items/total/page/limit, lowercase -- but each Payment
+ * inside `items` is still the PascalCase PaymentView above. Same mixed
+ * convention as PNRListResult/PNRSummary vs PNRDetail.
+ */
+export interface PaymentListResult {
+  items: Payment[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 // ======================================================

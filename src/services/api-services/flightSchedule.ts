@@ -8,23 +8,28 @@
 import type {
   ApiResponse,
   FlightSchedule,
-  ListResponse,
 } from '../../types/api';
 import api from '../api-client';
 
 export const flightSchedulesApi = {
   /**
    * GET /flights/schedules?page=&limit=&departure_airport_id=&arrival_airport_id=
-   * Real response is paginated: { items: [...], total: N } -- NOT a bare
-   * array. This function unwraps .items for callers.
+   * Real response is paginated: { items: [...], total: N } (see
+   * FlightScheduleHandler.List's `map[string]any{"items":..., "total":...}`)
+   * -- lowercase, and NOT the same shape as the generic capitalized
+   * ListResponse<T> used by Airport/Aircraft/SeatClass/FareClass (those
+   * go through MasterDataQueryService/ListResult[T], which has no json
+   * tags; flight schedules build their own map by hand instead). This
+   * was previously mistyped as ListResponse<T> here -- fixed to match
+   * what the handler actually sends.
    */
   async getSchedules(params?: {
     page?: number;
     limit?: number;
     departureAirportId?: number;
     arrivalAirportId?: number;
-  }): Promise<ListResponse<FlightSchedule>> {
-    const response = await api.get<ApiResponse<ListResponse<FlightSchedule>>>(
+  }): Promise<{ items: FlightSchedule[]; total: number }> {
+    const response = await api.get<ApiResponse<{ items: FlightSchedule[]; total: number }>>(
       '/flights/schedules',
       {
         params: {
@@ -35,7 +40,7 @@ export const flightSchedulesApi = {
         },
       },
     );
-    return response.data.data;
+    return response.data.data ?? { items: [], total: 0 };
   },
 
   /** GET /flights/schedules/{id} */

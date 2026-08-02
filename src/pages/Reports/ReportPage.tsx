@@ -123,7 +123,7 @@ const ReportPage = () => {
           <div className="premium-card p-6 h-full">
             <h2 className="text-lg font-bold text-slate-900 mb-1">Bookings by Status</h2>
             <p className="text-xs text-slate-500 mb-4">Created within the selected range.</p>
-            {data.bookings.by_status.length === 0 ? (
+            {(data.bookings.by_status??[]).length === 0 ? (
               <p className="text-sm text-slate-400 py-8 text-center">No bookings in this period.</p>
             ) : (
               <table className="w-full text-sm">
@@ -135,7 +135,7 @@ const ReportPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {data.bookings.by_status.map((s) => {
+                  {(data.bookings.by_status??[]).map((s) => {
                     const pct = data.bookings.total > 0 ? Math.round((s.count / data.bookings.total) * 100) : 0;
                     return (
                       <tr key={s.status}>
@@ -158,7 +158,7 @@ const ReportPage = () => {
             <p className="text-xs text-slate-500 mb-4">
               {data.payments.total} created · {formatMoney(data.payments.total_paid)} paid · {formatMoney(data.payments.total_refunded)} refunded
             </p>
-            {data.payments.by_status.length === 0 ? (
+            {(data.payments.by_status??[]).length === 0 ? (
               <p className="text-sm text-slate-400 py-8 text-center">No payments in this period.</p>
             ) : (
               <table className="w-full text-sm">
@@ -170,7 +170,7 @@ const ReportPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {data.payments.by_status.map((s) => (
+                  {(data.payments.by_status??[]).map((s) => (
                     <tr key={s.status}>
                       <td className="py-2 font-bold text-slate-700">{s.status}</td>
                       <td className="py-2 text-right text-slate-600">{s.count}</td>
@@ -188,7 +188,7 @@ const ReportPage = () => {
           <div className="premium-card p-6 h-full">
             <h2 className="text-lg font-bold text-slate-900 mb-1">Top Ancillaries</h2>
             <p className="text-xs text-slate-500 mb-4">{data.ancillaries.total_purchases} purchases in this period.</p>
-            {data.ancillaries.top_ancillaries.length === 0 ? (
+            {(data.ancillaries.top_ancillaries??[]).length === 0 ? (
               <p className="text-sm text-slate-400 py-8 text-center">No ancillary sales in this period.</p>
             ) : (
               <table className="w-full text-sm">
@@ -200,7 +200,7 @@ const ReportPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {data.ancillaries.top_ancillaries.map((a) => (
+                  {(data.ancillaries.top_ancillaries??[]).map((a) => (
                     <tr key={a.ancillary_code}>
                       <td className="py-2">
                         <div className="font-bold text-slate-800">{a.ancillary_name}</div>

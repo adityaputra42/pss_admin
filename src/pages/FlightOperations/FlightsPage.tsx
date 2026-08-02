@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Airport, FlightSearchResult, ListResponse } from '../../types/api';
+import type { Airport, Flight, FlightSchedule, Aircraft, FlightSearchResult, ListResponse } from '../../types/api';
 import {
   Plane,
   Search,
@@ -8,14 +8,22 @@ import {
   MapPin,
   Clock,
   ShieldAlert,
+  Plus,
+  Edit3,
+  Trash2,
+  PlaneTakeoff,
 } from 'lucide-react';
 
-import { showErrorAlert } from '../../utils/alerts';
+import { showConfirmAlert, showErrorAlert, showSuccessAlert } from '../../utils/alerts';
 
-import { flightsApi, airportsApi } from '../../services/api-services';
+import { flightsApi, airportsApi, flightSchedulesApi, aircraftsApi } from '../../services/api-services';
+import FlightInstanceModal from '../../components/flight/FlightInstanceModal';
 
+type Tab = 'search' | 'manage';
 
 const FlightsPage = () => {
+  const [tab, setTab] = useState<Tab>('search');
+
   const [flights, setFlights] = useState<FlightSearchResult[]>([]);
   const [airports, setAirports] = useState<ListResponse<Airport>>();
   const [isLoading, setIsLoading] = useState(false);
@@ -28,6 +36,15 @@ const FlightsPage = () => {
     new Date().toISOString().split('T')[0],
   );
 
+  // ---- Manage Instances tab ----
+  const [instances, setInstances] = useState<Flight[]>([]);
+  const [instancesTotal, setInstancesTotal] = useState(0);
+  const [instancesLoading, setInstancesLoading] = useState(false);
+  const [schedules, setSchedules] = useState<FlightSchedule[]>([]);
+  const [aircrafts, setAircrafts] = useState<Aircraft[]>([]);
+  const [instanceModalOpen, setInstanceModalOpen] = useState(false);
+  const [editingInstance, setEditingInstance] = useState<Flight | null>(null);
+
   useEffect(() => {
     airportsApi.getAirports().then(setAirports).catch(() => {});
   }, []);
@@ -37,6 +54,85 @@ const FlightsPage = () => {
     for (const a of airports?.Items??[]) map.set(a.id, a);
     return map;
   }, [airports?.Items]);
+
+  const scheduleById = useMemo(() => {
+    const map = new Map<number, FlightSchedule>();
+    for (const s of schedules) map.set(s.id, s);
+    return map;
+  }, [schedules]);
+
+  const aircraftById = useMemo(() => {
+    const map = new Map<number, Aircraft>();
+    for (const a of aircrafts) map.set(a.id, a);
+    return map;
+  }, [aircrafts]);
+
+  const loadInstances = async () => {
+    setInstancesLoading(true);
+    try {
+      const res = await flightsApi.getFlights(1, 100);
+      setInstances(res.items ?? []);
+      setInstancesTotal(res.total ?? 0);
+    } catch (err: any) {
+      showErrorAlert(err?.response?.data?.message || 'Failed to load flight instances');
+    } finally {
+      setInstancesLoading(false);
+    }
+  };
+
+  const loadManageDeps = async () => {
+    try {
+      const [scheduleRes, aircraftRes] = await Promise.all([
+        flightSchedulesApi.getSchedules({ limit: 100 }),
+        aircraftsApi.getAircrafts(),
+      ]);
+      setSchedules(scheduleRes.items ?? []);
+      setAircrafts(aircraftRes.Items ?? []);
+    } catch (err: any) {
+      showErrorAlert(err?.response?.data?.message || 'Failed to load schedules/aircraft');
+    }
+  };
+
+  useEffect(() => {
+    if (tab !== 'manage') return;
+    loadInstances();
+    loadManageDeps();
+  }, [tab]);
+
+  const handleSaveInstance = async (
+    data: { schedule_id: number; aircraft_id: number; departure_time: string; arrival_time: string; status: string },
+    id: number | null,
+  ) => {
+    try {
+      if (id) {
+        const { schedule_id: _unused, ...updatePayload } = data;
+        void _unused;
+        await flightsApi.updateFlight(id, updatePayload);
+      } else {
+        await flightsApi.createFlight(data);
+      }
+      showSuccessAlert(id ? 'Flight instance updated' : 'Flight instance created');
+      setInstanceModalOpen(false);
+      loadInstances();
+    } catch (err: any) {
+      showErrorAlert(err?.response?.data?.message || 'Failed to save flight instance');
+    }
+  };
+
+  const handleDeleteInstance = async (flight: Flight) => {
+    const confirmed = await showConfirmAlert(
+      'Delete Flight Instance',
+      `Delete flight #${flight.id}? If it already has seats, fares, or bookings tied to it, this may fail.`,
+    );
+    if (!confirmed) return;
+    try {
+      await flightsApi.deleteFlight(flight.id);
+      showSuccessAlert('Flight instance deleted');
+      loadInstances();
+    } catch (err: any) {
+      showErrorAlert(err?.response?.data?.message || 'Failed to delete flight instance');
+    }
+  };
 
   const fetchFlights = async () => {
     if (!depId || !arrId || !date) {
@@ -94,23 +190,58 @@ const FlightsPage = () => {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">
-            Flight Search
+            {tab === 'search' ? 'Flight Search' : 'Manage Flight Instances'}
           </h1>
 
           <p className="text-slate-500 mt-1">
-            Search operational flights by route and date.
+            {tab === 'search'
+              ? 'Search operational flights by route and date.'
+              : 'Create, edit, or remove individual flight instances directly.'}
           </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {tab === 'manage' && (
+            <button
+              onClick={() => { setEditingInstance(null); setInstanceModalOpen(true); }}
+              className="premium-button bg-primary text-white hover:bg-secondary shadow-lg shadow-teal-200 flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Add Flight Instance</span>
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="premium-card p-6 flex items-start gap-4 bg-amber-50/50 border border-amber-100">
-        <ShieldAlert className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-        <p className="text-sm text-amber-800">
-          There's no add/edit/delete here: individual flights aren't created directly --
-          they're generated in bulk from a schedule on the Flight Schedules page.
-        </p>
+      {/* Tab switcher */}
+      <div className="premium-card p-1.5 inline-flex gap-1">
+        <button
+          onClick={() => setTab('search')}
+          className={`px-5 py-2.5 rounded text-sm font-bold transition-colors ${tab === 'search' ? 'bg-primary text-white shadow' : 'text-slate-500 hover:text-slate-900'}`}
+        >
+          Search
+        </button>
+        <button
+          onClick={() => setTab('manage')}
+          className={`px-5 py-2.5 rounded text-sm font-bold transition-colors ${tab === 'manage' ? 'bg-primary text-white shadow' : 'text-slate-500 hover:text-slate-900'}`}
+        >
+          Manage Instances
+        </button>
       </div>
 
+      {tab === 'search' && (
+        <div className="premium-card p-6 flex items-start gap-4 bg-amber-50/50 border border-amber-100">
+          <ShieldAlert className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-sm text-amber-800">
+            This search view is read-only. For bulk creation from a recurring schedule, use the
+            Flight Schedules page's "Generate Flights" action; for editing or removing ONE
+            instance directly, use the "Manage Instances" tab above.
+          </p>
+        </div>
+      )}
+
+      {tab === 'search' && (
+      <>
       {/* Filters */}
       <div className="premium-card p-5">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -288,6 +419,99 @@ const FlightsPage = () => {
           )}
         </div>
       )}
+      </>
+      )}
+
+      {tab === 'manage' && (
+        <div className="premium-card overflow-hidden">
+          {instancesLoading ? (
+            <div className="p-20 flex flex-col items-center justify-center gap-4">
+              <div className="w-10 h-10 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin"></div>
+              <p className="text-slate-500 font-medium italic">Loading flight instances...</p>
+            </div>
+          ) : instances.length === 0 ? (
+            <div className="p-20 text-center">
+              <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-md flex items-center justify-center mx-auto mb-4">
+                <PlaneTakeoff className="w-8 h-8" />
+              </div>
+              <p className="text-slate-500 font-medium">No flight instances yet</p>
+              <p className="text-slate-400 text-sm mt-1">Generate some from a schedule, or add one manually.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/70">
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">ID</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Schedule</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Aircraft</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Departure</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Arrival</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Status</th>
+                    <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-slate-500">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {instances.map((flight) => {
+                    const schedule = scheduleById.get(flight.schedule_id);
+                    const aircraft = aircraftById.get(flight.aircraft_id);
+                    return (
+                      <tr key={flight.id} className="group hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-400">#{flight.id}</td>
+                        <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800">
+                          {schedule?.flight_number ?? `Schedule #${flight.schedule_id}`}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-slate-600">
+                          {aircraft?.registration_number ?? `Aircraft #${flight.aircraft_id}`}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{formatDateTime(flight.departure_time)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{formatDateTime(flight.arrival_time)}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${getStatusColor(flight.status)}`}>
+                            {flight.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right whitespace-nowrap">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => { setEditingInstance(flight); setInstanceModalOpen(true); }}
+                              className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded transition-all"
+                              title="Edit"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteInstance(flight)}
+                              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-all"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {instancesTotal > instances.length && (
+            <div className="px-6 py-3 text-xs text-slate-400 border-t border-slate-50">
+              Showing {instances.length} of {instancesTotal} -- increase the page limit in getFlights() to see more.
+            </div>
+          )}
+        </div>
+      )}
+
+      <FlightInstanceModal
+        isOpen={instanceModalOpen}
+        onClose={() => setInstanceModalOpen(false)}
+        flight={editingInstance}
+        schedules={schedules}
+        aircrafts={aircrafts}
+        onSave={handleSaveInstance}
+      />
     </div>
   );
 };

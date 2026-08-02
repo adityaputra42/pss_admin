@@ -1,25 +1,31 @@
 import type {
   ApiResponse,
   PNR,
+  PNRDetail,
+  PNRListResult,
 } from '../../types/api';
 
 import api from '../api-client';
 
 /**
- * ⚠️ BACKEND REALITY CHECK (internal/booking/interfaces/http/router.go):
- * the booking module exposes exactly ONE HTTP endpoint:
- *   POST /bookings/pnrs
- * That's it. There is NO GET /bookings (list), NO GET /bookings/{id}, NO
- * GET /bookings/locator/{code}, and NO DELETE/cancel endpoint. An admin
- * "browse all bookings" or "look up one booking" page CANNOT be built
- * against this backend today -- the closest thing that exists is
- * dashboardApi.getRecentBookings() (dashboard.ts), which returns a
- * limited, non-paginated summary view (10-100 rows, a handful of fields),
- * not a real bookings list/search/detail/cancel API. getBookings,
- * getBookingById, getBookingByLocator, and cancelBooking are removed
- * below rather than left pointing at endpoints that don't exist -- this
- * is new backend work (booking module needs read + cancel endpoints
- * added), not something fixable by changing this file.
+ * BACKEND (internal/booking/interfaces/http/router.go):
+ *   POST /bookings/pnrs                  (create -- OptionalAuthenticate,
+ *        works for both logged-in and guest bookings)
+ *
+ * Admin visibility/management, added alongside CreatePNRHandler:
+ *   GET  /bookings/pnrs                  permission: booking.pnr.view
+ *   GET  /bookings/pnrs/{id}             permission: booking.pnr.view
+ *   POST /bookings/pnrs/{id}/cancel      permission: booking.pnr.cancel
+ *
+ * IMPORTANT SCOPE LIMIT on cancel: CancelPNRHandler only allows
+ * cancelling a PNR that is still HOLD (not yet paid). A PNR that's
+ * already BOOKED (paid) will come back with a 400 -- there is still no
+ * refund flow in the payment module, so cancelling a paid booking isn't
+ * safe to expose here. See CancelPNRHandler.Handle's comment for why.
+ *
+ * dashboardApi.getRecentBookings() (dashboard.ts) still exists as a
+ * separate, lighter, non-paginated summary view -- prefer getBookings()
+ * here for an actual admin bookings list/search page.
  */
 export const bookingsApi = {
   /**
@@ -41,5 +47,43 @@ export const bookingsApi = {
   }): Promise<PNR | null> {
     const response = await api.post<ApiResponse<PNR>>('/bookings/pnrs', payload);
     return response.data.data;
+  },
+
+  /**
+   * GET /bookings/pnrs?page=&limit=&status=
+   * Summary rows (no contact info) -- follow up with getBookingById for
+   * one PNR's full detail. status is optional (e.g. "HOLD", "BOOKED",
+   * "CANCELLED", "EXPIRED"); omit for all statuses.
+   */
+  async getBookings(params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+  }): Promise<PNRListResult> {
+    const response = await api.get<ApiResponse<PNRListResult>>('/bookings/pnrs', {
+      params: {
+        page: params?.page ?? 1,
+        limit: params?.limit ?? 10,
+        status: params?.status || undefined,
+      },
+    });
+    return response.data.data ?? { items: [], total: 0, page: 1, limit: 10 };
+  },
+
+  /** GET /bookings/pnrs/{id} -- full detail incl. contact info. */
+  async getBookingById(id: number): Promise<PNRDetail | null> {
+    const response = await api.get<ApiResponse<PNRDetail>>(`/bookings/pnrs/${id}`);
+    return response.data.data;
+  },
+
+  /**
+   * POST /bookings/pnrs/{id}/cancel. Releases held seats. Only works if
+   * the PNR is still HOLD -- expect a 400 (utils.WriteError, message
+   * from ErrPNRNotCancellable) if it's already BOOKED, CANCELLED, or
+   * EXPIRED. Let that error surface to the admin rather than swallowing
+   * it; there's no safe automatic fallback here.
+   */
+  async cancelBooking(id: number): Promise<void> {
+    await api.post(`/bookings/pnrs/${id}/cancel`);
   },
 };

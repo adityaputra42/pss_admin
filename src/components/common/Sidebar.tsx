@@ -20,6 +20,8 @@ import {
   Settings,
   ChevronsLeft,
   ChevronsRight,
+  Armchair,
+  Ticket,
 } from 'lucide-react';
 
 import { useState } from 'react';
@@ -66,6 +68,16 @@ const navigation = [
         name: 'Aircraft',
         href: '/aircraft',
         icon: Plane,
+      },
+      {
+        name: 'Seat Classes',
+        href: '/seat-classes',
+        icon: Armchair,
+      },
+      {
+        name: 'Fare Classes',
+        href: '/fare-classes',
+        icon: Ticket,
       },
     ],
   },
