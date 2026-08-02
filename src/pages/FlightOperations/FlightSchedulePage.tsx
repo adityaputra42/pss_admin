@@ -19,6 +19,7 @@ import {
   showSuccessAlert,
 } from '../../utils/alerts';
 import { flightSchedulesApi, airportsApi } from '../../services/api-services';
+import FlightScheduleFormModal from '../../components/flight/FlightScheduleFormModal';
 
 
 const FlightSchedulesPage = () => {
@@ -31,13 +32,8 @@ const FlightSchedulesPage = () => {
   const [search, setSearch] = useState('');
 
   // modal
-  // Read side (isModalOpen/editingSchedule) isn't used yet -- the
-  // FlightScheduleFormModal below is commented out pending that
-  // component being built. Setters are kept so handleAddSchedule/
-  // handleEditSchedule stay ready to wire up.
-  const [, setIsModalOpen] = useState(false);
-  const [, setEditingSchedule] =
-    useState<FlightSchedule | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState<FlightSchedule | null>(null);
 
   useEffect(() => {
     fetchSchedules();
@@ -137,6 +133,44 @@ const FlightSchedulesPage = () => {
         err?.response?.data?.message ||
           'Failed to delete schedule',
       );
+    }
+  };
+
+  const handleSaveSchedule = async (
+    data: {
+      flight_number?: string;
+      departure_airport_id?: number;
+      arrival_airport_id?: number;
+      departure_time: string;
+      arrival_time: string;
+      operating_days: number;
+    },
+    id: number | null,
+  ) => {
+    try {
+      if (id) {
+        await flightSchedulesApi.updateSchedule(id, {
+          departure_time: data.departure_time,
+          arrival_time: data.arrival_time,
+          operating_days: data.operating_days,
+        });
+      } else {
+        await flightSchedulesApi.createSchedule(
+          data as {
+            flight_number: string;
+            departure_airport_id: number;
+            arrival_airport_id: number;
+            departure_time: string;
+            arrival_time: string;
+            operating_days: number;
+          },
+        );
+      }
+      showSuccessAlert(id ? 'Flight schedule updated' : 'Flight schedule created');
+      setIsModalOpen(false);
+      fetchSchedules();
+    } catch (err: any) {
+      showErrorAlert(err?.response?.data?.message || 'Failed to save flight schedule');
     }
   };
 
@@ -396,14 +430,13 @@ const FlightSchedulesPage = () => {
       </div>
 
       {/* modal */}
-      {/*
       <FlightScheduleFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         schedule={editingSchedule}
-        onSuccess={fetchSchedules}
+        airports={airports?.Items ?? []}
+        onSave={handleSaveSchedule}
       />
-      */}
     </div>
   );
 };
