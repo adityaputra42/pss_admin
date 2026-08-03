@@ -1,5 +1,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Plane,
   Plus,
@@ -8,6 +9,7 @@ import {
   Trash2,
   Users,
   Building2,
+  LayoutGrid,
 } from 'lucide-react';
 import { aircraftsApi } from '../../services/api-services/aircraft';
 import type { Aircraft } from '../../types/api';
@@ -16,12 +18,16 @@ import {
   showErrorAlert,
   showSuccessAlert,
 } from '../../utils/alerts';
+import AircraftFormModal from '../../components/flight/AircraftFormModal';
 
 const AircraftPage = () => {
+  const navigate = useNavigate();
   const [aircrafts, setAircrafts] = useState<Aircraft[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [manufacturerFilter, setManufacturerFilter] = useState('ALL');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingAircraft, setEditingAircraft] = useState<Aircraft | null>(null);
 
   const fetchAircrafts = async () => {
     setLoading(true);
@@ -82,6 +88,26 @@ const AircraftPage = () => {
     }
   };
 
+  const handleSave = async (
+    data: { manufacturer: string; model: string; registration_number?: string },
+    id: number | null,
+  ) => {
+    try {
+      if (id) {
+        await aircraftsApi.updateAircraft(id, { manufacturer: data.manufacturer, model: data.model });
+      } else {
+        await aircraftsApi.createAircraft(
+          data as { manufacturer: string; model: string; registration_number: string },
+        );
+      }
+      showSuccessAlert(id ? 'Aircraft updated' : 'Aircraft created');
+      setModalOpen(false);
+      fetchAircrafts();
+    } catch (error: any) {
+      showErrorAlert(error?.response?.data?.message || 'Failed to save aircraft');
+    }
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -95,7 +121,10 @@ const AircraftPage = () => {
           </p>
         </div>
 
-        <button className="premium-button bg-primary text-white hover:bg-secondary shadow-lg shadow-teal-200 flex items-center gap-2 self-start lg:self-auto">
+        <button
+          onClick={() => { setEditingAircraft(null); setModalOpen(true); }}
+          className="premium-button bg-primary text-white hover:bg-secondary shadow-lg shadow-teal-200 flex items-center gap-2 self-start lg:self-auto"
+        >
           <Plus className="w-5 h-5" />
           <span>Add Aircraft</span>
         </button>
@@ -230,7 +259,18 @@ const AircraftPage = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-400 break-all max-w-45">{aircraft.id}</td>
                   <td className="px-6 py-4 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-1">
-                      <button className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded transition-all" title="Edit">
+                      <button
+                        onClick={() => navigate(`/aircraft/${aircraft.id}`)}
+                        className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded transition-all"
+                        title="View seat layout"
+                      >
+                        <LayoutGrid className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => { setEditingAircraft(aircraft); setModalOpen(true); }}
+                        className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded transition-all"
+                        title="Edit"
+                      >
                         <Edit3 className="w-4 h-4" />
                       </button>
                       <button
@@ -248,6 +288,13 @@ const AircraftPage = () => {
           </table>
         )}
       </div>
+
+      <AircraftFormModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        aircraft={editingAircraft}
+        onSave={handleSave}
+      />
     </div>
   );
 };

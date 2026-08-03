@@ -14,6 +14,7 @@ import FlightSchedulesPage from './pages/FlightOperations/FlightSchedulePage';
 import RoutesPage from './pages/FlightOperations/RoutePage';
 import AirportPage from './pages/FlightOperations/AirportPage';
 import AircraftPage from './pages/FlightOperations/AircraftPage';
+import AircraftDetailPage from './pages/FlightOperations/AircraftDetailPage';
 import SeatClassPage from './pages/FlightOperations/SeatClassPage';
 import FareClassPage from './pages/FlightOperations/FareClassPage';
 import PageTransition from './components/animations/PageTransition';
@@ -43,6 +44,7 @@ useEffect(() => {
           <Route path="/routes" element={<PageTransition><RoutesPage /></PageTransition>} />
           <Route path="/airports" element={<PageTransition><AirportPage /></PageTransition>} />
           <Route path="/aircraft" element={<PageTransition><AircraftPage /></PageTransition>} />
+          <Route path="/aircraft/:id" element={<PageTransition><AircraftDetailPage /></PageTransition>} />
           <Route path="/seat-classes" element={<PageTransition><SeatClassPage /></PageTransition>} />
           <Route path="/fare-classes" element={<PageTransition><FareClassPage /></PageTransition>} />
           <Route path="/payments" element={<PageTransition><PaymentsPage /></PageTransition>} />

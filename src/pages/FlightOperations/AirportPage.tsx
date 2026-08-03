@@ -13,11 +13,14 @@ import {
   showErrorAlert,
   showSuccessAlert,
 } from '../../utils/alerts';
+import AirportFormModal from '../../components/flight/AirportFormModal';
 
 const AirportPage = () => {
   const [airports, setAirports] = useState<Airport[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingAirport, setEditingAirport] = useState<Airport | null>(null);
 
   const fetchAirports = async () => {
     setLoading(true);
@@ -68,6 +71,31 @@ const AirportPage = () => {
     }
   };
 
+  const handleSave = async (
+    data: { code?: string; name: string; city: string; country: string; timezone: string },
+    id: number | null,
+  ) => {
+    try {
+      if (id) {
+        await airportsApi.updateAirport(id, {
+          name: data.name,
+          city: data.city,
+          country: data.country,
+          timezone: data.timezone,
+        });
+      } else {
+        await airportsApi.createAirport(
+          data as { code: string; name: string; city: string; country: string; timezone: string },
+        );
+      }
+      showSuccessAlert(id ? 'Airport updated' : 'Airport created');
+      setModalOpen(false);
+      fetchAirports();
+    } catch (error: any) {
+      showErrorAlert(error?.response?.data?.message || 'Failed to save airport');
+    }
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -80,7 +108,10 @@ const AirportPage = () => {
           </p>
         </div>
 
-        <button className="premium-button bg-primary text-white hover:bg-secondary shadow-lg shadow-teal-200 flex items-center gap-2 self-start md:self-auto">
+        <button
+          onClick={() => { setEditingAirport(null); setModalOpen(true); }}
+          className="premium-button bg-primary text-white hover:bg-secondary shadow-lg shadow-teal-200 flex items-center gap-2 self-start md:self-auto"
+        >
           <Plus className="w-5 h-5" />
           <span>Add Airport</span>
         </button>
@@ -189,7 +220,10 @@ const AirportPage = () => {
 
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded transition-all">
+                        <button
+                          onClick={() => { setEditingAirport(airport); setModalOpen(true); }}
+                          className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded transition-all"
+                        >
                           <Edit3 className="w-4 h-4" />
                         </button>
 
@@ -208,6 +242,13 @@ const AirportPage = () => {
           </div>
         )}
       </div>
+
+      <AirportFormModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        airport={editingAirport}
+        onSave={handleSave}
+      />
     </div>
   );
 };

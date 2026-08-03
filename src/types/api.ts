@@ -27,18 +27,11 @@ export interface PaginationMeta {
 // ROLE
 // ======================================================
 
-/** POST /roles body. is_system_role/is_active aren't accepted here --
- * every role created through the API is non-system and active
- * (RoleCommandService.CreateRole). */
 export interface RoleInput {
   name: string;
   description?: string;
   level: number;
 }
-
-/** PUT /roles/{id} body. name is immutable (never accepted on update).
- * For system roles, level/is_active are REJECTED server-side (422) --
- * only description can change. See RoleCommandService.UpdateRole. */
 export interface RoleUpdateInput {
   description?: string;
   level?: number;
@@ -48,9 +41,6 @@ export interface RoleUpdateInput {
 // ======================================================
 // ASSIGN PERMISSION
 // ======================================================
-
-/** PUT /roles/{id}/permissions body. This REPLACES the role's entire
- * permission set -- send the full desired list every time, not a diff. */
 export interface AssignPermissionsInput {
   permission_ids: number[];
 }
@@ -77,14 +67,6 @@ export type RoleDetailResponse = RoleDetail;
 // ======================================================
 // USER
 // ======================================================
-
-// ⚠️ This matches the RAW JSON actually returned by POST /auth/register
-// and PUT /auth/users/{id} (see commanddb.User in
-// internal/auth/persistence/postgres/sqlc/command/models.go) -- the
-// backend serializes that struct directly, not a dedicated API user model.
-// Note it also includes password_hash: the backend leaks it in these
-// responses (a real backend bug, not something to work around here --
-// just don't render it anywhere in the UI).
 export interface User {
   id: number;
   username: string;
@@ -98,14 +80,6 @@ export interface User {
   updated_at?: string;
 }
 
-/**
- * GET /auth/me response (internal/auth/application/query/get_me.go's
- * MeView) -- the "who am I, what can I do" endpoint. Not gated by
- * RequirePermission: any authenticated user can fetch their own.
- * `permissions` is the FULL list this user's role grants, used to
- * decide what the sidebar/UI shows -- it is NOT a security boundary by
- * itself, the server still enforces every call independently.
- */
 export interface MePermission {
   module: string;
   resource: string;
@@ -143,13 +117,6 @@ export interface PasswordUpdateInput {
   confirm_password: string;
 }
 
-/**
- * GET /auth/users (admin list) response -- internal/auth/application/
- * query/list_users.go's ListUsersResult, real snake_case json tags.
- * Was previously a guess (UserListResponse w/ `meta`) before this
- * endpoint existed; corrected to match what ListUsersHandler actually
- * returns: flat items/total/page/limit, no nested meta object.
- */
 export interface UserListResult {
   items: User[];
   total: number;
@@ -206,12 +173,37 @@ export interface AircraftListResponse {
 }
 
 // ======================================================
+// AIRCRAFT SEAT LAYOUT
+// ======================================================
+export interface AircraftSeat {
+  id: number;
+  aircraft_id: number;
+  seat_number: string; // e.g. "12A" -- row_number + seat_letter concatenated server-side
+  row_number: number;
+  seat_letter: string;
+  seat_class_id: number;
+  seat_type: string; // e.g. "WINDOW" | "MIDDLE" | "AISLE" -- exact set not confirmed, don't hardcode a strict union
+  x_position?: number | null;
+  y_position?: number | null;
+  is_exit_row: boolean;
+}
+
+export interface SeatRowGroupInput {
+  seat_class_id: number;
+  row_start: number;
+  row_end: number;
+  seat_letters: string; // e.g. "ABCDEF" -- one seat per letter per row in this group
+  seat_type: string;
+  exit_rows?: number[];
+}
+
+export interface GenerateSeatLayoutInput {
+  layout: SeatRowGroupInput[];
+}
+
+// ======================================================
 // SEAT CLASS
 // ======================================================
-// Matches querydb.SeatClass exactly (internal/flight/persistence/
-// postgres/sqlc/query/models.go) -- real snake_case json tags, same
-// convention as Airport/Aircraft above (unlike FlightSearchResult/PNR/
-// Payment elsewhere in this file, which are PascalCase).
 
 export interface SeatClass {
   id: number;
@@ -229,20 +221,10 @@ export interface SeatClassInput {
 /** PUT /flights/seat-classes/{id} only accepts name -- code is immutable after creation, same convention as Aircraft.registration_number. */
 export type SeatClassUpdateInput = Partial<Pick<SeatClassInput, 'name'>>;
 
-/**
- * GET /flights/seat-classes and GET /flights/fare-classes go through
- * MasterDataQueryService, same as Airport/Aircraft -- ListResult<T> has
- * NO json tags, so it serializes as capitalized {Items, Total}, not
- * {items, total}. Reuse the existing ListResponse<T> type (already
- * capitalized) instead of the lowercase *ListResponse ones below.
- */
 
 // ======================================================
 // FARE CLASS
 // ======================================================
-// Matches querydb.FareClass exactly. seat_class_id links to SeatClass
-// above; there is no embedded seat_class object, cross-reference by id
-// the same way FlightsPage does for schedule_id/aircraft_id.
 
 export interface FareClass {
   id: number;
@@ -310,26 +292,7 @@ export interface FlightScheduleListResponse {
 // FLIGHT
 // ======================================================
 // FLIGHT INSTANCE
-//
-// Matches the REAL, flat querydb.Flight row (see
-// internal/flight/persistence/postgres/sqlc/query/models.go) --
-// GET /flights/instances and GET /flights/instances/{id} return exactly
-// this, with only schedule_id/aircraft_id foreign keys, NOT joined
-// schedule/aircraft/airport objects, and no seats/price data at all
-// (fares live on a separate FlightFare row, only surfaced via search).
-// FlightsPage.tsx cross-references schedule_id/aircraft_id against
-// separately-fetched schedules/aircraft lists to show route/aircraft
-// names -- it's not embedded in this response.
-//
-// As of the CreateFlightHandler/UpdateFlightHandler/DeleteFlightHandler
-// addition, this row IS now directly create/update/delete-able via
-// POST|PUT|DELETE /flights/instances(/{id}) -- see flight.ts. Manual
-// create does NOT generate flight_seats/flight_fares the way
-// generate-flights does -- a manually created flight has no bookable
-// seats/prices until those are added separately. Use generate-flights
-// for a sellable flight; use manual create/update/delete for fixing up
-// or removing a bad instance.
-// ======================================================
+
 export interface Flight {
   id: number;
   schedule_id: number;
@@ -344,6 +307,15 @@ export interface Flight {
 export interface FlightsResponse {
   items: Flight[];
   total: number;
+}
+
+export interface FlightFare {
+  id: number;
+  flight_id: number;
+  fare_class_id: number;
+  price: string;
+  currency: string;
+  available_seats: number;
 }
 
 /** POST /flights/instances body. All fields required; times are RFC3339 (e.g. "2026-08-15T09:00:00+07:00"), status optional (defaults SCHEDULED server-side). */
@@ -367,34 +339,38 @@ export const FLIGHT_STATUSES = [
   'CANCELLED',
 ] as const;
 
-/**
- * ⚠️ Shape of GET /flights/search results -- NOTE THE PascalCase FIELD
- * NAMES. Unlike every other endpoint in this backend, FlightSearchResult
- * (internal/flight/application/query/flight_search_query.go) has no
- * `json:` struct tags, so Go's encoding/json falls back to the exported
- * Go field names verbatim (FlightID, not flight_id). This is a real
- * backend inconsistency, not a frontend typo -- if someone "fixes" it by
- * adding json tags later, this type (and searchFlights() in flight.ts)
- * needs to change to snake_case too.
- */
-export interface FlightSearchResult {
-  FlightID: number;
-  ScheduleID: number;
-  FlightNumber: string;
-  DepartureAirportID: number;
-  ArrivalAirportID: number;
-  AircraftID: number;
-  DepartureTime: string;
-  ArrivalTime: string;
-  Status: string;
-  Fares: Array<{
-    id: number;
-    flight_id: number;
-    fare_class_id: number;
-    price: string | number;
-    currency: string;
-    available_seats: number;
-  }>;
+export interface ItinerarySegment {
+  flight_id: number;
+  flight_number: string;
+  departure_airport_id: number;
+  arrival_airport_id: number;
+  aircraft_id: number;
+  departure_time: string;
+  arrival_time: string;
+  status: string;
+}
+
+export interface ItineraryFare {
+  fare_class_id: number;
+  price: string;
+  currency: string;
+  available_seats: number; // bottleneck: min across the itinerary's segments
+}
+
+export interface Itinerary {
+  stops: number; // 0 = direct, 1 = one connection
+  aircraft_changed: boolean[]; // length == stops; true = plane changes at that connection point
+  duration_minutes: number; // first departure to last arrival, includes layover
+  segments: ItinerarySegment[];
+  fares: ItineraryFare[];
+}
+
+export type TripType = 'ONE_WAY' | 'ROUND_TRIP';
+
+export interface FlightSearchResponse {
+  trip_type: TripType;
+  outbound: Itinerary[];
+  return?: Itinerary[]; // present (possibly empty) only when trip_type is ROUND_TRIP
 }
 // ======================================================
 // PNR / BOOKING
@@ -411,12 +387,6 @@ export interface Passenger {
   passport_number?: string;
 }
 
-/**
- * ⚠️ Matches CreatePNRResult (internal/booking/application/command/
- * create_pnr.go) exactly -- PascalCase, no json tags, same backend
- * pattern as PaymentView/BoardingPassView/FlightSearchResult. This is
- * ONLY the create-response shape.
- */
 export interface PNR {
   PNRID: number;
   BookingCode: string;
@@ -431,13 +401,6 @@ export interface BookingListResponse {
   meta: PaginationMeta;
 }
 
-/**
- * GET /bookings/pnrs/{id} response -- matches bookingcontract.PNRInfo
- * exactly (internal/booking/contract/pnr_query.go), same "no json tags"
- * PascalCase convention as PNR/Payment above. Full detail incl. contact
- * info; TotalAmount is a decimal string, not a number (avoids float
- * rounding on money, same reasoning as Payment.Amount).
- */
 export interface PNRDetail {
   ID: number;
   BookingCode: string;
@@ -452,13 +415,6 @@ export interface PNRDetail {
   CreatedBy: number | null;
 }
 
-/**
- * GET /bookings/pnrs (admin list) response. Unlike PNR/PNRDetail above,
- * this one DOES have json tags (internal/booking/application/query/
- * pnr_query_service.go's PNRSummary/ListPNRsResult) -- real snake_case,
- * a deliberately lighter row (no contact fetch per row -- follow up
- * with GET /bookings/pnrs/{id} for contact details on one PNR).
- */
 export interface PNRSummary {
   id: number;
   booking_code: string;
@@ -481,13 +437,6 @@ export interface PNRListResult {
 // PAYMENT
 // ======================================================
 
-/**
- * ⚠️ Matches PaymentView (internal/payment/application/query/
- * payment_query.go) exactly, including PascalCase -- same root cause as
- * FlightSearchResult: this DTO has no json struct tags, so Go serializes
- * the Go field names verbatim. Amount is a decimal STRING, not a number
- * (avoids float rounding on money).
- */
 export interface Payment {
   ID: number;
   PaymentCode: string;
@@ -505,13 +454,6 @@ export interface PaymentListResponse {
   meta: PaginationMeta;
 }
 
-/**
- * GET /payments (admin, list across all PNRs) response. The wrapper
- * (internal/payment/application/query's ListPaymentsResult) DOES have
- * json tags -- items/total/page/limit, lowercase -- but each Payment
- * inside `items` is still the PascalCase PaymentView above. Same mixed
- * convention as PNRListResult/PNRSummary vs PNRDetail.
- */
 export interface PaymentListResult {
   items: Payment[];
   total: number;
@@ -523,15 +465,6 @@ export interface PaymentListResult {
 // ANCILLARY
 // ======================================================
 
-/**
- * Matches internal/ancillary's sqlc-generated Ancillary{Category,Price,
- * Inventory}/BookingAncillary structs exactly, all serialized with real
- * snake_case json tags (unlike CatalogItem below). Nullable
- * pgtype.Text/Int8/Timestamptz fields marshal to `string|number|null`,
- * not the pgx wrapper object -- confirmed against pgx v5.6.0's
- * MarshalJSON for Text/Int8/Timestamptz/Numeric (all bare
- * value-or-null, never an object).
- */
 export interface AncillaryCategory {
   id: number;
   code: string;
@@ -541,10 +474,6 @@ export interface AncillaryCategory {
   updated_at: string;
 }
 
-/** The raw catalog item row (as returned by create/update/delete). For
- * the browsable listing with price attached, see CatalogItem -- that's
- * a *different*, PascalCase shape (Service.ListCatalog has no json
- * tags, so Go serializes Go field names verbatim). */
 export interface AncillaryItem {
   id: number;
   category_id: number;
@@ -556,15 +485,6 @@ export interface AncillaryItem {
   updated_at: string;
 }
 
-/**
- * ⚠️ Service.ListCatalog's CatalogItem struct (internal/ancillary/
- * application/query/service.go) has NO json struct tags -- same root
- * cause as PaymentView -- so these fields are PascalCase on the wire,
- * not snake_case. CurrentPrice is a decimal STRING (built with
- * fmt.Sprintf, not pgtype's numeric marshal) and is null/omitted when
- * the ancillary has no price configured yet -- that's a valid state,
- * not an error.
- */
 export interface CatalogItem {
   ID: number;
   CategoryID: number;
@@ -611,9 +531,6 @@ export interface AncillaryPurchase {
   payment_id: number | null;
 }
 
-/** Shape of GET /ancillaries and GET /ancillaries/categories --
- * map[string]any{"items","total","page","limit"} from catalog_handler.go,
- * lowercase, NOT the PascalCase ListResponse<T> used elsewhere. */
 export interface AncillaryListResponse<T> {
   items: T[];
   total: number;
@@ -625,13 +542,6 @@ export interface AncillaryListResponse<T> {
 // REPORT
 // ======================================================
 
-/**
- * Matches internal/report/application/query's response DTOs exactly
- * (all snake_case json tags, hand-written structs -- not sqlc/pgtype,
- * so no nullability surprises here). Every report takes an optional
- * from/to (YYYY-MM-DD, inclusive); omitted defaults to the last 30 days
- * server-side, capped at 366 days.
- */
 export interface ReportDateRange {
   from: string;
   to: string;
@@ -752,12 +662,7 @@ export interface ReportOverview {
   };
   net_revenue: number;
 }
-// ======================================================
 
-/**
- * Matches checkInResponse (internal/checkin/interfaces/http/
- * checkin_handler.go) -- this one DOES have proper snake_case json tags.
- */
 export interface Checkin {
   checkin_id: number;
   boarding_pass_number: string;
@@ -775,15 +680,6 @@ export interface CheckinListResponse {
   meta: PaginationMeta;
 }
 
-// ======================================================
-// BOARDING PASS
-// ======================================================
-
-/**
- * ⚠️ Matches BoardingPassView (internal/checkin/application/query/
- * boarding_pass_query.go) exactly -- PascalCase, no json tags, same
- * backend pattern as PaymentView/PNR/FlightSearchResult.
- */
 export interface BoardingPass {
   CheckinID: number;
   BoardingPassNumber: string;

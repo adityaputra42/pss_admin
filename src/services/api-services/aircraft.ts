@@ -1,15 +1,12 @@
 import type {
   Aircraft,
+  AircraftSeat,
   ApiResponse,
+  GenerateSeatLayoutInput,
   ListResponse,
 } from '../../types/api';
 import api from '../api-client';
 
-/**
- * Aircraft API Service.
- * Real path is /flights/aircrafts (plural, nested under /flights) --
- * was /aircraft (singular, top-level) before, which doesn't exist.
- */
 export const aircraftsApi = {
   async getAircrafts(): Promise<ListResponse<Aircraft>> {
     const response = await api.get<ApiResponse<ListResponse<Aircraft>>>('/flights/aircrafts');
@@ -45,17 +42,33 @@ export const aircraftsApi = {
   },
 
   /**
+   * GET /flights/aircrafts/{id}/seats -- the physical seat map. Bare
+   * array, not paginated (added alongside GetAircraftSeatLayout --
+   * previously only Generate/Clear existed, no way to read the current
+   * layout back). Empty array if nothing's been generated yet.
+   */
+  async getSeatLayout(id: number): Promise<AircraftSeat[]> {
+    const response = await api.get<ApiResponse<AircraftSeat[]>>(`/flights/aircrafts/${id}/seats`);
+    return response.data.data ?? [];
+  },
+
+  /**
    * Generate the seat layout for an aircraft.
    * POST /flights/aircrafts/{id}/seats/generate
-   * This endpoint EXISTS on the backend but wasn't used anywhere in this
-   * file before -- added since aircraft management is incomplete without
-   * it (an aircraft has no bookable seats until this is called).
+   * Body: { layout: [{ seat_class_id, row_start, row_end, seat_letters,
+   *         seat_type, exit_rows? }, ...] } -- each entry is a block of
+   * rows sharing one seat class (e.g. rows 1-4 Business "AC", rows
+   * 5-30 Economy "ABCDEF"). Fails (400) if the layout overlaps an
+   * existing one -- clear first if replacing.
    */
-  async generateSeatLayout(id: number, payload: unknown): Promise<void> {
+  async generateSeatLayout(id: number, payload: GenerateSeatLayoutInput): Promise<void> {
     await api.post(`/flights/aircrafts/${id}/seats/generate`, payload);
   },
 
-  /** DELETE /flights/aircrafts/{id}/seats -- clears the seat layout. */
+  /**
+   * DELETE /flights/aircrafts/{id}/seats -- clears the seat layout.
+   * Blocked server-side if flights already exist for this aircraft.
+   */
   async clearSeatLayout(id: number): Promise<void> {
     await api.delete(`/flights/aircrafts/${id}/seats`);
   },

@@ -3,7 +3,7 @@ import { Fragment, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { X, PlaneTakeoff } from 'lucide-react';
+import { X } from 'lucide-react';
 
 import type { Flight, FlightSchedule, Aircraft } from '../../types/api';
 import { FLIGHT_STATUSES } from '../../types/api';

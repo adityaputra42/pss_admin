@@ -1,31 +1,36 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Airport, Flight, FlightSchedule, Aircraft, FlightSearchResult, ListResponse } from '../../types/api';
+import type { Airport, Flight, FlightSchedule, Aircraft, Itinerary, TripType, FareClass, ListResponse } from '../../types/api';
 import {
   Plane,
   Search,
   Filter,
   Calendar,
   MapPin,
-  Clock,
   ShieldAlert,
   Plus,
   Edit3,
   Trash2,
   PlaneTakeoff,
+  DollarSign,
 } from 'lucide-react';
 
 import { showConfirmAlert, showErrorAlert, showSuccessAlert } from '../../utils/alerts';
 
-import { flightsApi, airportsApi, flightSchedulesApi, aircraftsApi } from '../../services/api-services';
+import { flightsApi, airportsApi, flightSchedulesApi, aircraftsApi, fareClassesApi } from '../../services/api-services';
 import FlightInstanceModal from '../../components/flight/FlightInstanceModal';
+import ItineraryCard from '../../components/flight/ItineraryCard';
+import FlightFareManagerModal from '../../components/flight/FlightFareManagerModal';
 
 type Tab = 'search' | 'manage';
 
 const FlightsPage = () => {
   const [tab, setTab] = useState<Tab>('search');
 
-  const [flights, setFlights] = useState<FlightSearchResult[]>([]);
+  const [outbound, setOutbound] = useState<Itinerary[]>([]);
+  const [returnItins, setReturnItins] = useState<Itinerary[]>([]);
+  const [tripTypeResult, setTripTypeResult] = useState<TripType>('ONE_WAY');
   const [airports, setAirports] = useState<ListResponse<Airport>>();
+  const [fareClasses, setFareClasses] = useState<FareClass[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
@@ -35,6 +40,9 @@ const FlightsPage = () => {
   const [date, setDate] = useState(
     new Date().toISOString().split('T')[0],
   );
+  const [tripType, setTripType] = useState<'one_way' | 'round_trip'>('one_way');
+  const [returnDate, setReturnDate] = useState('');
+  const [maxStops, setMaxStops] = useState<0 | 1>(1);
 
   // ---- Manage Instances tab ----
   const [instances, setInstances] = useState<Flight[]>([]);
@@ -44,9 +52,12 @@ const FlightsPage = () => {
   const [aircrafts, setAircrafts] = useState<Aircraft[]>([]);
   const [instanceModalOpen, setInstanceModalOpen] = useState(false);
   const [editingInstance, setEditingInstance] = useState<Flight | null>(null);
+  const [fareModalOpen, setFareModalOpen] = useState(false);
+  const [fareModalFlight, setFareModalFlight] = useState<Flight | null>(null);
 
   useEffect(() => {
     airportsApi.getAirports().then(setAirports).catch(() => {});
+    fareClassesApi.getFareClasses(1, 100).then((r) => setFareClasses(r.Items ?? [])).catch(() => {});
   }, []);
 
   const airportById = useMemo(() => {
@@ -54,6 +65,12 @@ const FlightsPage = () => {
     for (const a of airports?.Items??[]) map.set(a.id, a);
     return map;
   }, [airports?.Items]);
+
+  const fareClassById = useMemo(() => {
+    const map = new Map<number, FareClass>();
+    for (const f of fareClasses) map.set(f.id, f);
+    return map;
+  }, [fareClasses]);
 
   const scheduleById = useMemo(() => {
     const map = new Map<number, FlightSchedule>();
@@ -139,21 +156,31 @@ const FlightsPage = () => {
       showErrorAlert('Departure, arrival and date are required');
       return;
     }
+    if (tripType === 'round_trip' && !returnDate) {
+      showErrorAlert('Return date is required for a round trip search');
+      return;
+    }
 
     setIsLoading(true);
     setError('');
     setHasSearched(true);
 
     try {
-      const results = await flightsApi.searchFlights({
+      const result = await flightsApi.searchFlights({
         departureAirportId: depId,
         arrivalAirportId: arrId,
         date,
+        tripType,
+        returnDate: tripType === 'round_trip' ? returnDate : undefined,
+        maxStops,
       });
-      setFlights(results);
+      setOutbound(result.outbound ?? []);
+      setReturnItins(result.return ?? []);
+      setTripTypeResult(result.trip_type);
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Failed to fetch flights');
-      setFlights([]);
+      setOutbound([]);
+      setReturnItins([]);
     } finally {
       setIsLoading(false);
     }
@@ -243,7 +270,7 @@ const FlightsPage = () => {
       {tab === 'search' && (
       <>
       {/* Filters */}
-      <div className="premium-card p-5">
+      <div className="premium-card p-5 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="text-sm font-semibold text-slate-600 mb-2 block">
@@ -285,7 +312,7 @@ const FlightsPage = () => {
 
           <div>
             <label className="text-sm font-semibold text-slate-600 mb-2 block">
-              Date
+              Departure Date
             </label>
             <div className="relative">
               <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -298,7 +325,55 @@ const FlightsPage = () => {
             </div>
           </div>
 
-          <div className="flex items-end">
+          <div>
+            <label className="text-sm font-semibold text-slate-600 mb-2 block">
+              Trip Type
+            </label>
+            <select
+              value={tripType}
+              onChange={(e) => setTripType(e.target.value as 'one_way' | 'round_trip')}
+              className="w-full px-4 py-3 rounded border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none bg-white"
+            >
+              <option value="one_way">One-way</option>
+              <option value="round_trip">Round trip</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {tripType === 'round_trip' && (
+            <div>
+              <label className="text-sm font-semibold text-slate-600 mb-2 block">
+                Return Date
+              </label>
+              <div className="relative">
+                <Calendar className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="date"
+                  value={returnDate}
+                  min={date}
+                  onChange={(e) => setReturnDate(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 rounded border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="text-sm font-semibold text-slate-600 mb-2 block">
+              Connections
+            </label>
+            <select
+              value={maxStops}
+              onChange={(e) => setMaxStops(Number(e.target.value) as 0 | 1)}
+              className="w-full px-4 py-3 rounded border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none bg-white"
+            >
+              <option value={0}>Direct flights only</option>
+              <option value={1}>Allow 1 connection</option>
+            </select>
+          </div>
+
+          <div className="flex items-end md:col-start-4">
             <button
               onClick={fetchFlights}
               className="w-full bg-primary hover:bg-secondary text-white py-3 rounded font-semibold flex items-center justify-center gap-2 transition-all"
@@ -315,9 +390,16 @@ const FlightsPage = () => {
           <div className="flex items-center gap-3">
             <Filter className="w-5 h-5 text-primary" />
             <p className="text-sm text-slate-600">
-              Showing{' '}
-              <span className="font-bold text-slate-900">{flights.length}</span>{' '}
-              flights
+              {tripTypeResult === 'ROUND_TRIP' ? (
+                <>
+                  <span className="font-bold text-slate-900">{outbound.length}</span> outbound ·{' '}
+                  <span className="font-bold text-slate-900">{returnItins.length}</span> return itineraries
+                </>
+              ) : (
+                <>
+                  <span className="font-bold text-slate-900">{outbound.length}</span> itineraries found
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -325,99 +407,50 @@ const FlightsPage = () => {
 
       {/* Content */}
       {hasSearched && (
-        <div className="premium-card overflow-hidden">
-          {isLoading ? (
-            <div className="p-20 flex flex-col items-center justify-center gap-4">
-              <div className="w-10 h-10 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin"></div>
-              <p className="text-slate-500 font-medium italic">Loading flights...</p>
+        isLoading ? (
+          <div className="premium-card p-20 flex flex-col items-center justify-center gap-4">
+            <div className="w-10 h-10 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin"></div>
+            <p className="text-slate-500 font-medium italic">Loading flights...</p>
+          </div>
+        ) : error ? (
+          <div className="premium-card p-20 text-center">
+            <p className="text-red-500 font-medium">{error}</p>
+            <button onClick={fetchFlights} className="mt-4 text-primary font-semibold hover:underline">
+              Try Again
+            </button>
+          </div>
+        ) : outbound.length === 0 ? (
+          <div className="premium-card p-20 text-center">
+            <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-md flex items-center justify-center mx-auto mb-4">
+              <Plane className="w-8 h-8" />
             </div>
-          ) : error ? (
-            <div className="p-20 text-center">
-              <p className="text-red-500 font-medium">{error}</p>
-              <button onClick={fetchFlights} className="mt-4 text-primary font-semibold hover:underline">
-                Try Again
-              </button>
+            <p className="text-slate-500 font-medium">No flights found</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="space-y-3">
+              {tripTypeResult === 'ROUND_TRIP' && (
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Outbound</h3>
+              )}
+              {outbound.map((itin, i) => (
+                <ItineraryCard key={i} itinerary={itin} airportById={airportById} fareClassById={fareClassById} />
+              ))}
             </div>
-          ) : flights.length === 0 ? (
-            <div className="p-20 text-center">
-              <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-md flex items-center justify-center mx-auto mb-4">
-                <Plane className="w-8 h-8" />
+
+            {tripTypeResult === 'ROUND_TRIP' && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Return</h3>
+                {returnItins.length === 0 ? (
+                  <p className="text-sm text-slate-400">No return itineraries found for that date.</p>
+                ) : (
+                  returnItins.map((itin, i) => (
+                    <ItineraryCard key={i} itinerary={itin} airportById={airportById} fareClassById={fareClassById} />
+                  ))
+                )}
               </div>
-              <p className="text-slate-500 font-medium">No flights found</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/70">
-                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Flight</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Route</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Schedule</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Fares</th>
-                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-slate-500">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {flights.map((flight) => {
-                    const dep = airportById.get(flight.DepartureAirportID);
-                    const arr = airportById.get(flight.ArrivalAirportID);
-                    return (
-                      <tr key={flight.FlightID} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-5">
-                          <div className="font-bold text-slate-900">{flight.FlightNumber}</div>
-                          <div className="text-xs text-slate-500 mt-1">#{flight.FlightID}</div>
-                        </td>
-
-                        <td className="px-6 py-5">
-                          <div className="font-semibold text-slate-800">
-                            {dep?.code ?? `#${flight.DepartureAirportID}`}{' '}→{' '}{arr?.code ?? `#${flight.ArrivalAirportID}`}
-                          </div>
-                          <div className="text-xs text-slate-500 mt-1">
-                            {dep?.city ?? '-'} → {arr?.city ?? '-'}
-                          </div>
-                        </td>
-
-                        <td className="px-6 py-5">
-                          <div className="flex items-start gap-2">
-                            <Clock className="w-4 h-4 text-slate-400 mt-0.5" />
-                            <div>
-                              <div className="text-sm font-medium text-slate-800">
-                                {formatDateTime(flight.DepartureTime)}
-                              </div>
-                              <div className="text-xs text-slate-500 mt-1">
-                                Arrival: {formatDateTime(flight.ArrivalTime)}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-
-                        <td className="px-6 py-5">
-                          {flight.Fares.length === 0 ? (
-                            <span className="text-xs text-slate-400">No fares</span>
-                          ) : (
-                            <div className="space-y-1">
-                              {flight.Fares.map((fare) => (
-                                <div key={fare.id} className="text-xs font-medium text-slate-700">
-                                  {fare.currency} {fare.price} · {fare.available_seats} seats
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </td>
-
-                        <td className="px-6 py-5">
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold capitalize ${getStatusColor(flight.Status)}`}>
-                            {flight.Status}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )
       )}
       </>
       )}
@@ -474,6 +507,13 @@ const FlightsPage = () => {
                         <td className="px-6 py-4 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-1">
                             <button
+                              onClick={() => { setFareModalFlight(flight); setFareModalOpen(true); }}
+                              className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded transition-all"
+                              title="Manage Fares"
+                            >
+                              <DollarSign className="w-4 h-4" />
+                            </button>
+                            <button
                               onClick={() => { setEditingInstance(flight); setInstanceModalOpen(true); }}
                               className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded transition-all"
                               title="Edit"
@@ -511,6 +551,13 @@ const FlightsPage = () => {
         schedules={schedules}
         aircrafts={aircrafts}
         onSave={handleSaveInstance}
+      />
+
+      <FlightFareManagerModal
+        isOpen={fareModalOpen}
+        onClose={() => setFareModalOpen(false)}
+        flight={fareModalFlight}
+        fareClasses={fareClasses}
       />
     </div>
   );
