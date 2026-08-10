@@ -5,9 +5,9 @@ import type {
   FlightInput,
   FlightUpdateInput,
   ApiResponse,
-  FlightsResponse,
   FlightSearchResponse,
   FlightFare,
+  ListResponse,
 } from '../../types/api';
 
 export const flightsApi = {
@@ -16,8 +16,8 @@ export const flightsApi = {
     page: number = 1,
     limit: number = 10,
     scheduleId?: number,
-  ): Promise<FlightsResponse> {
-    const response = await api.get<ApiResponse<FlightsResponse>>('/flights/instances', {
+  ): Promise<ListResponse<Flight>> {
+    const response = await api.get<ApiResponse<ListResponse<Flight>>>('/flights/instances', {
       params: { page, limit, schedule_id: scheduleId || undefined },
     });
     return response.data.data ?? { items: [], total: 0 };

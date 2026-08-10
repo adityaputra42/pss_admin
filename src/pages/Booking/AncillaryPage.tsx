@@ -32,17 +32,9 @@ const purchaseStatusStyle: Record<string, { icon: React.ReactNode; className: st
   CANCELLED: { icon: <XCircle className="w-3.5 h-3.5" />, className: 'bg-rose-50 text-rose-600 ring-rose-100' },
 };
 
-/**
- * Replaces the old dead-stub BaggagePage. "Baggage" was never a real
- * backend module -- what actually exists is internal/ancillary, a
- * broader sellable-extras catalog (baggage is just one category among
- * several: seats, meals, etc). See ancillary.ts for the full endpoint
- * inventory and the caveats baked into each call.
- */
 const AncillaryPage = () => {
   const [tab, setTab] = useState<Tab>('categories');
 
-  // ---- shared: categories (used by both Categories tab and Catalog's category filter/select) ----
   const [categories, setCategories] = useState<AncillaryCategory[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
@@ -91,7 +83,6 @@ const AncillaryPage = () => {
     }
   };
 
-  // ---- Catalog tab ----
   const [catalog, setCatalog] = useState<CatalogItem[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogTotal, setCatalogTotal] = useState(0);

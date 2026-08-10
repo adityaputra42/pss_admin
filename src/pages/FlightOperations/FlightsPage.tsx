@@ -5,6 +5,7 @@ import {
   Search,
   Filter,
   Calendar,
+  CalendarRange,
   MapPin,
   ShieldAlert,
   Plus,
@@ -20,6 +21,7 @@ import { flightsApi, airportsApi, flightSchedulesApi, aircraftsApi, fareClassesA
 import FlightInstanceModal from '../../components/flight/FlightInstanceModal';
 import ItineraryCard from '../../components/flight/ItineraryCard';
 import FlightFareManagerModal from '../../components/flight/FlightFareManagerModal';
+import GenerateFlightsModal from '../../components/flight/GenerateFlightsModal';
 
 type Tab = 'search' | 'manage';
 
@@ -45,7 +47,7 @@ const FlightsPage = () => {
   const [maxStops, setMaxStops] = useState<0 | 1>(1);
 
   // ---- Manage Instances tab ----
-  const [instances, setInstances] = useState<Flight[]>([]);
+  const [instances, setInstances] = useState<ListResponse<Flight>>();
   const [instancesTotal, setInstancesTotal] = useState(0);
   const [instancesLoading, setInstancesLoading] = useState(false);
   const [schedules, setSchedules] = useState<FlightSchedule[]>([]);
@@ -54,6 +56,7 @@ const FlightsPage = () => {
   const [editingInstance, setEditingInstance] = useState<Flight | null>(null);
   const [fareModalOpen, setFareModalOpen] = useState(false);
   const [fareModalFlight, setFareModalFlight] = useState<Flight | null>(null);
+  const [generateModalOpen, setGenerateModalOpen] = useState(false);
 
   useEffect(() => {
     airportsApi.getAirports().then(setAirports).catch(() => {});
@@ -88,8 +91,9 @@ const FlightsPage = () => {
     setInstancesLoading(true);
     try {
       const res = await flightsApi.getFlights(1, 100);
-      setInstances(res.items ?? []);
-      setInstancesTotal(res.total ?? 0);
+      console.log('Loaded flight instances:', res);
+      setInstances(res);
+      setInstancesTotal(res.Total ?? 0);
     } catch (err: any) {
       showErrorAlert(err?.response?.data?.message || 'Failed to load flight instances');
     } finally {
@@ -229,13 +233,22 @@ const FlightsPage = () => {
 
         <div className="flex items-center gap-2">
           {tab === 'manage' && (
-            <button
-              onClick={() => { setEditingInstance(null); setInstanceModalOpen(true); }}
-              className="premium-button bg-primary text-white hover:bg-secondary shadow-lg shadow-teal-200 flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Add Flight Instance</span>
-            </button>
+            <>
+              <button
+                onClick={() => setGenerateModalOpen(true)}
+                className="premium-button bg-white border border-slate-200 text-slate-700 hover:border-primary hover:text-primary flex items-center gap-2"
+              >
+                <CalendarRange className="w-5 h-5" />
+                <span>Generate from Schedule</span>
+              </button>
+              <button
+                onClick={() => { setEditingInstance(null); setInstanceModalOpen(true); }}
+                className="premium-button bg-primary text-white hover:bg-secondary shadow-lg shadow-teal-200 flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                <span>Add Flight Instance</span>
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -462,7 +475,7 @@ const FlightsPage = () => {
               <div className="w-10 h-10 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin"></div>
               <p className="text-slate-500 font-medium italic">Loading flight instances...</p>
             </div>
-          ) : instances.length === 0 ? (
+          ) : (instances?.Items??[]).length === 0 ? (
             <div className="p-20 text-center">
               <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-md flex items-center justify-center mx-auto mb-4">
                 <PlaneTakeoff className="w-8 h-8" />
@@ -485,7 +498,7 @@ const FlightsPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {instances.map((flight) => {
+                  {(instances?.Items ?? []).map((flight) => {
                     const schedule = scheduleById.get(flight.schedule_id);
                     const aircraft = aircraftById.get(flight.aircraft_id);
                     return (
@@ -536,9 +549,9 @@ const FlightsPage = () => {
               </table>
             </div>
           )}
-          {instancesTotal > instances.length && (
+          {instancesTotal > ((instances?.Items??[]).length ?? 0) && (
             <div className="px-6 py-3 text-xs text-slate-400 border-t border-slate-50">
-              Showing {instances.length} of {instancesTotal} -- increase the page limit in getFlights() to see more.
+              Showing {((instances?.Items??[]).length ?? 0)} of {instancesTotal} -- increase the page limit in getFlights() to see more.
             </div>
           )}
         </div>
@@ -558,6 +571,16 @@ const FlightsPage = () => {
         onClose={() => setFareModalOpen(false)}
         flight={fareModalFlight}
         fareClasses={fareClasses}
+      />
+
+      <GenerateFlightsModal
+        isOpen={generateModalOpen}
+        onClose={() => setGenerateModalOpen(false)}
+        schedules={schedules}
+        aircrafts={aircrafts}
+        fareClasses={fareClasses}
+        airportById={airportById}
+        onGenerated={loadInstances}
       />
     </div>
   );

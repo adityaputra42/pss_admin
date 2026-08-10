@@ -16,8 +16,8 @@ import {
   ClipboardCheck,
   FileText,
   BarChart3,
-  Bell,
-  Settings,
+  // Bell,
+  // Settings,
   ChevronsLeft,
   ChevronsRight,
   Armchair,
@@ -150,16 +150,16 @@ const navigation = [
   {
     section: 'System',
     items: [
-      {
-        name: 'Notifications',
-        href: '/notifications',
-        icon: Bell,
-      },
-      {
-        name: 'Settings',
-        href: '/settings',
-        icon: Settings,
-      },
+      // {
+      //   name: 'Notifications',
+      //   href: '/notifications',
+      //   icon: Bell,
+      // },
+      // {
+      //   name: 'Settings',
+      //   href: '/settings',
+      //   icon: Settings,
+      // },
       {
         name: 'Profile',
         href: '/profile',
