@@ -267,8 +267,8 @@ export interface FlightSchedule {
   departure_time: string; // "HH:MM"
   arrival_time: string; // "HH:MM"
 
-  operating_days: number; // bitmask -- don't decode this yourself
-  operating_days_labels: string[]; // e.g. ["MON","WED","FRI"] -- backend already decodes it, use this for display
+  operating_days: number;
+  operating_days_labels: string[];
 }
 
 export interface FlightScheduleInput {
@@ -343,7 +343,11 @@ export interface ItinerarySegment {
   flight_id: number;
   flight_number: string;
   departure_airport_id: number;
+  departure_airport_code: string;
+  departure_airport_name: string;
   arrival_airport_id: number;
+  arrival_airport_code: string;
+  arrival_airport_name: string;
   aircraft_id: number;
   departure_time: string;
   arrival_time: string;
@@ -369,8 +373,8 @@ export type TripType = 'ONE_WAY' | 'ROUND_TRIP';
 
 export interface FlightSearchResponse {
   trip_type: TripType;
-  outbound: Itinerary[];
-  return?: Itinerary[]; // present (possibly empty) only when trip_type is ROUND_TRIP
+  departure: Itinerary[];
+  return?: Itinerary[];
 }
 // ======================================================
 // PNR / BOOKING

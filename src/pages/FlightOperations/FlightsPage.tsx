@@ -7,7 +7,6 @@ import {
   Calendar,
   CalendarRange,
   MapPin,
-  ShieldAlert,
   Plus,
   Edit3,
   Trash2,
@@ -23,12 +22,16 @@ import ItineraryCard from '../../components/flight/ItineraryCard';
 import FlightFareManagerModal from '../../components/flight/FlightFareManagerModal';
 import GenerateFlightsModal from '../../components/flight/GenerateFlightsModal';
 
+import PassengerSelector, {
+  type PassengerState,
+} from '../../components/flight/PassangerSelector';
+
 type Tab = 'search' | 'manage';
 
 const FlightsPage = () => {
   const [tab, setTab] = useState<Tab>('search');
 
-  const [outbound, setOutbound] = useState<Itinerary[]>([]);
+  const [departure, setDeparture] = useState<Itinerary[]>([]);
   const [returnItins, setReturnItins] = useState<Itinerary[]>([]);
   const [tripTypeResult, setTripTypeResult] = useState<TripType>('ONE_WAY');
   const [airports, setAirports] = useState<ListResponse<Airport>>();
@@ -36,16 +39,23 @@ const FlightsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+const [depId, setDepId] = useState<number | ''>('');
+const [arrId, setArrId] = useState<number | ''>('');
 
-  const [depId, setDepId] = useState<number | ''>('');
-  const [arrId, setArrId] = useState<number | ''>('');
-  const [date, setDate] = useState(
-    new Date().toISOString().split('T')[0],
-  );
-  const [tripType, setTripType] = useState<'one_way' | 'round_trip'>('one_way');
-  const [returnDate, setReturnDate] = useState('');
-  const [maxStops, setMaxStops] = useState<0 | 1>(1);
+const [date, setDate] = useState(
+  new Date().toISOString().split('T')[0],
+);
 
+const [tripType, setTripType] = useState<'one_way' | 'round_trip'>('one_way');
+const [returnDate, setReturnDate] = useState('');
+const [maxStops, setMaxStops] = useState<0 | 1>(1);
+
+const [passengers, setPassengers] = useState<PassengerState>({
+  adults: 1,
+  children: 0,
+  infants: 0,
+  class: 'ECONOMY',
+});
   // ---- Manage Instances tab ----
   const [instances, setInstances] = useState<ListResponse<Flight>>();
   const [instancesTotal, setInstancesTotal] = useState(0);
@@ -178,12 +188,12 @@ const FlightsPage = () => {
         returnDate: tripType === 'round_trip' ? returnDate : undefined,
         maxStops,
       });
-      setOutbound(result.outbound ?? []);
+      setDeparture(result.departure ?? []);
       setReturnItins(result.return ?? []);
       setTripTypeResult(result.trip_type);
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Failed to fetch flights');
-      setOutbound([]);
+      setDeparture([]);
       setReturnItins([]);
     } finally {
       setIsLoading(false);
@@ -269,7 +279,7 @@ const FlightsPage = () => {
         </button>
       </div>
 
-      {tab === 'search' && (
+      {/* {tab === 'search' && (
         <div className="premium-card p-6 flex items-start gap-4 bg-amber-50/50 border border-amber-100">
           <ShieldAlert className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
           <p className="text-sm text-amber-800">
@@ -278,7 +288,7 @@ const FlightsPage = () => {
             instance directly, use the "Manage Instances" tab above.
           </p>
         </div>
-      )}
+      )} */}
 
       {tab === 'search' && (
       <>
@@ -353,6 +363,9 @@ const FlightsPage = () => {
           </div>
         </div>
 
+         {/* Passenger & Class */}
+
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {tripType === 'round_trip' && (
             <div>
@@ -385,6 +398,12 @@ const FlightsPage = () => {
               <option value={1}>Allow 1 connection</option>
             </select>
           </div>
+           <div>
+    <PassengerSelector
+      value={passengers}
+      onChange={setPassengers}
+    />
+  </div>
 
           <div className="flex items-end md:col-start-4">
             <button
@@ -398,76 +417,141 @@ const FlightsPage = () => {
         </div>
       </div>
 
-      {hasSearched && (
-        <div className="premium-card p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Filter className="w-5 h-5 text-primary" />
-            <p className="text-sm text-slate-600">
-              {tripTypeResult === 'ROUND_TRIP' ? (
-                <>
-                  <span className="font-bold text-slate-900">{outbound.length}</span> outbound ·{' '}
-                  <span className="font-bold text-slate-900">{returnItins.length}</span> return itineraries
-                </>
-              ) : (
-                <>
-                  <span className="font-bold text-slate-900">{outbound.length}</span> itineraries found
-                </>
-              )}
-            </p>
-          </div>
+
+    {/* Search result summary */}
+    {hasSearched && (
+      <div className="premium-card p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Filter className="w-5 h-5 text-primary" />
+
+          <p className="text-sm text-slate-600">
+            {tripTypeResult === 'ROUND_TRIP' ? (
+              <>
+                <span className="font-bold text-slate-900">
+                  {departure.length}
+                </span>{' '}
+                outbound ·{' '}
+                <span className="font-bold text-slate-900">
+                  {returnItins.length}
+                </span>{' '}
+                return itineraries
+              </>
+            ) : (
+              <>
+                <span className="font-bold text-slate-900">
+                  {departure.length}
+                </span>{' '}
+                itineraries found
+              </>
+            )}
+          </p>
         </div>
-      )}
+      </div>
+    )}
 
-      {/* Content */}
-      {hasSearched && (
-        isLoading ? (
-          <div className="premium-card p-20 flex flex-col items-center justify-center gap-4">
-            <div className="w-10 h-10 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin"></div>
-            <p className="text-slate-500 font-medium italic">Loading flights...</p>
-          </div>
-        ) : error ? (
-          <div className="premium-card p-20 text-center">
-            <p className="text-red-500 font-medium">{error}</p>
-            <button onClick={fetchFlights} className="mt-4 text-primary font-semibold hover:underline">
-              Try Again
-            </button>
-          </div>
-        ) : outbound.length === 0 ? (
-          <div className="premium-card p-20 text-center">
-            <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-md flex items-center justify-center mx-auto mb-4">
-              <Plane className="w-8 h-8" />
-            </div>
-            <p className="text-slate-500 font-medium">No flights found</p>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="space-y-3">
-              {tripTypeResult === 'ROUND_TRIP' && (
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Outbound</h3>
-              )}
-              {outbound.map((itin, i) => (
-                <ItineraryCard key={i} itinerary={itin} airportById={airportById} fareClassById={fareClassById} />
-              ))}
-            </div>
+    {/* Content */}
+    {!hasSearched ? (
+      // Belum melakukan search
+      <div className="premium-card p-20 text-center">
+        <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-5">
+          <Plane className="w-8 h-8" />
+        </div>
 
-            {tripTypeResult === 'ROUND_TRIP' && (
-              <div className="space-y-3">
-                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Return</h3>
-                {returnItins.length === 0 ? (
-                  <p className="text-sm text-slate-400">No return itineraries found for that date.</p>
-                ) : (
-                  returnItins.map((itin, i) => (
-                    <ItineraryCard key={i} itinerary={itin} airportById={airportById} fareClassById={fareClassById} />
-                  ))
-                )}
-              </div>
+        <h3 className="text-lg font-bold text-slate-800">
+          Search for a flight
+        </h3>
+
+        <p className="text-sm text-slate-500 mt-2 max-w-md mx-auto">
+          Select your departure, arrival, travel date, passenger,
+          and cabin class to find available flights.
+        </p>
+      </div>
+    ) : isLoading ? (
+      // Loading
+      <div className="premium-card p-20 flex flex-col items-center justify-center gap-4">
+        <div className="w-10 h-10 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin" />
+
+        <p className="text-slate-500 font-medium italic">
+          Loading flights...
+        </p>
+      </div>
+    ) : error ? (
+      // Error
+      <div className="premium-card p-20 text-center">
+        <p className="text-red-500 font-medium">
+          {error}
+        </p>
+
+        <button
+          onClick={fetchFlights}
+          className="mt-4 text-primary font-semibold hover:underline"
+        >
+          Try Again
+        </button>
+      </div>
+    ) : departure.length === 0 ? (
+      // Tidak ada hasil
+      <div className="premium-card p-20 text-center">
+        <div className="w-16 h-16 bg-slate-50 text-slate-400 rounded-md flex items-center justify-center mx-auto mb-4">
+          <Plane className="w-8 h-8" />
+        </div>
+
+        <p className="text-slate-500 font-medium">
+          No flights found
+        </p>
+
+        <p className="text-sm text-slate-400 mt-2">
+          Try changing your route, date, or passenger filters.
+        </p>
+      </div>
+    ) : (
+      // Hasil flight
+      <div className="space-y-6">
+        {/* Departure */}
+        <div className="space-y-3">
+          {tripTypeResult === 'ROUND_TRIP' && (
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+              Departure
+            </h3>
+          )}
+
+          {departure.map((itin, i) => (
+            <ItineraryCard
+              key={i}
+              itinerary={itin}
+              airportById={airportById}
+              fareClassById={fareClassById}
+            />
+          ))}
+        </div>
+
+        {/* Return */}
+        {tripTypeResult === 'ROUND_TRIP' && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+              Return
+            </h3>
+
+            {returnItins.length === 0 ? (
+              <p className="text-sm text-slate-400">
+                No return itineraries found for that date.
+              </p>
+            ) : (
+              returnItins.map((itin, i) => (
+                <ItineraryCard
+                  key={i}
+                  itinerary={itin}
+                  airportById={airportById}
+                  fareClassById={fareClassById}
+                />
+              ))
             )}
           </div>
-        )
-      )}
-      </>
-      )}
-
+        )}
+      </div>
+    )}
+  </>
+)}
       {tab === 'manage' && (
         <div className="premium-card overflow-hidden">
           {instancesLoading ? (
