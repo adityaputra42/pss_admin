@@ -297,10 +297,8 @@ export interface Flight {
   id: number;
   schedule_id: number;
   aircraft_id: number;
-
   departure_time: string;
   arrival_time: string;
-
   status: string; // e.g. "SCHEDULED" | "DEPARTED" | "ARRIVED" | "CANCELLED" -- exact set not confirmed, don't hardcode a strict union
 }
 
@@ -309,16 +307,32 @@ export interface FlightsResponse {
   total: number;
 }
 
+/** ADT = adult, CHD = child, INF = infant (no seat, travels on an adult's lap). */
+export type PassengerType = 'ADT' | 'CHD' | 'INF';
+
+export const PASSENGER_TYPES: PassengerType[] = ['ADT', 'CHD', 'INF'];
+
+export const PASSENGER_TYPE_LABELS: Record<PassengerType, string> = {
+  ADT: 'Adult',
+  CHD: 'Child',
+  INF: 'Infant',
+};
+
+export interface FlightFarePrice {
+  id: number;
+  passenger_type: string; // ADT | CHD | INF
+  price: string;
+  currency: string;
+}
+
 export interface FlightFare {
   id: number;
   flight_id: number;
   fare_class_id: number;
-  price: string;
-  currency: string;
   available_seats: number;
+  prices: FlightFarePrice[];
 }
 
-/** POST /flights/instances body. All fields required; times are RFC3339 (e.g. "2026-08-15T09:00:00+07:00"), status optional (defaults SCHEDULED server-side). */
 export interface FlightInput {
   schedule_id: number;
   aircraft_id: number;
@@ -327,7 +341,6 @@ export interface FlightInput {
   status?: string;
 }
 
-/** PUT /flights/instances/{id} body -- schedule_id is NOT editable (see UpdateFlight's sqlc comment: delete + regenerate instead if the schedule itself is wrong). */
 export type FlightUpdateInput = Partial<Omit<FlightInput, 'schedule_id'>>;
 
 export const FLIGHT_STATUSES = [
@@ -356,7 +369,8 @@ export interface ItinerarySegment {
 
 export interface ItineraryFare {
   fare_class_id: number;
-  price: string;
+  /** passenger_type (ADT/CHD/INF) -> decimal price string. */
+  prices: Record<string, string>;
   currency: string;
   available_seats: number; // bottleneck: min across the itinerary's segments
 }

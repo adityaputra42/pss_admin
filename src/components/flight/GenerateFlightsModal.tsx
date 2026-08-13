@@ -3,6 +3,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { X, Plus, Trash2, Calendar as CalendarIcon } from 'lucide-react';
 
 import type { FlightSchedule, Aircraft, FareClass, Airport } from '../../types/api';
+import { PASSENGER_TYPES } from '../../types/api';
 import { flightsApi } from '../../services/api-services/flight';
 import { showErrorAlert, showSuccessAlert } from '../../utils/alerts';
 
@@ -25,12 +26,16 @@ interface SegmentRow {
 
 interface FareRow {
   fare_class_id: string;
+  passenger_type: string;
   price: string;
   currency: string;
 }
 
 const emptySegment: SegmentRow = { start_date: '', end_date: '', aircraft_id: '' };
-const emptyFare: FareRow = { fare_class_id: '', price: '', currency: 'IDR' };
+// One row is one (fare_class, passenger_type) price -- the backend's
+// `fares` array is flat now, not nested. To sell a fare class to
+// ADT+CHD+INF, add three rows sharing the same fare class.
+const emptyFare: FareRow = { fare_class_id: '', passenger_type: 'ADT', price: '', currency: 'IDR' };
 
 
 const GenerateFlightsModal: React.FC<GenerateFlightsModalProps> = ({
@@ -57,10 +62,19 @@ const GenerateFlightsModal: React.FC<GenerateFlightsModalProps> = ({
     setFares((rows) => rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
   };
 
+  // Duplicate (fare_class_id, passenger_type) pairs would just have the
+  // second row silently win server-side -- catch it client-side instead.
+  const hasDuplicateFareRow = fares.some(
+    (f, i) =>
+      f.fare_class_id &&
+      fares.findIndex((o) => o.fare_class_id === f.fare_class_id && o.passenger_type === f.passenger_type) !== i,
+  );
+
   const isValid =
     !!scheduleId &&
     segments.every((s) => s.start_date && s.end_date && s.aircraft_id) &&
-    fares.every((f) => f.fare_class_id && f.price && f.currency.length === 3);
+    fares.every((f) => f.fare_class_id && f.passenger_type && f.price && f.currency.length === 3) &&
+    !hasDuplicateFareRow;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +89,7 @@ const GenerateFlightsModal: React.FC<GenerateFlightsModalProps> = ({
         })),
         fares: fares.map((f) => ({
           fare_class_id: Number(f.fare_class_id),
+          passenger_type: f.passenger_type,
           price: f.price,
           currency: f.currency.toUpperCase(),
         })),
@@ -212,43 +227,67 @@ const GenerateFlightsModal: React.FC<GenerateFlightsModalProps> = ({
                       </button>
                     </div>
                     <p className="text-xs text-slate-400 mb-2">
-                      Applied to every flight this generates -- to vary price over time, generate again later with a narrower date range.
+                      Applied to every flight this generates. One row = one price for one passenger type -- to
+                      sell a fare class to ADT, CHD and INF, add three rows with that same fare class.
                     </p>
                     <div className="space-y-2">
-                      {fares.map((fare, i) => (
-                        <div key={i} className="grid grid-cols-12 gap-2 items-center">
-                          <select
-                            value={fare.fare_class_id}
-                            onChange={(e) => updateFare(i, { fare_class_id: e.target.value })}
-                            className="col-span-5 py-2.5 px-2 bg-slate-50 border-none rounded text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
-                          >
-                            <option value="">Fare class</option>
-                            {fareClasses.map((fc) => (
-                              <option key={fc.id} value={fc.id}>{fc.code} — {fc.name}</option>
-                            ))}
-                          </select>
-                          <input
-                            type="number" step="0.01" placeholder="Price"
-                            value={fare.price}
-                            onChange={(e) => updateFare(i, { price: e.target.value })}
-                            className="col-span-4 py-2.5 px-3 bg-slate-50 border-none rounded text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
-                          />
-                          <input
-                            value={fare.currency}
-                            onChange={(e) => updateFare(i, { currency: e.target.value.toUpperCase() })}
-                            maxLength={3}
-                            className="col-span-2 py-2.5 px-2 bg-slate-50 border-none rounded text-sm outline-none focus:ring-2 focus:ring-teal-500/20 uppercase text-center"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setFares((rows) => rows.filter((_, idx) => idx !== i))}
-                            disabled={fares.length === 1}
-                            className="col-span-1 p-2 text-slate-400 hover:text-red-500 disabled:opacity-30 disabled:hover:text-slate-400"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
+                      {fares.map((fare, i) => {
+                        const isDuplicate =
+                          fare.fare_class_id &&
+                          fares.findIndex(
+                            (o) => o.fare_class_id === fare.fare_class_id && o.passenger_type === fare.passenger_type,
+                          ) !== i;
+                        return (
+                          <div key={i}>
+                            <div className="grid grid-cols-12 gap-2 items-center">
+                              <select
+                                value={fare.fare_class_id}
+                                onChange={(e) => updateFare(i, { fare_class_id: e.target.value })}
+                                className="col-span-4 py-2.5 px-2 bg-slate-50 border-none rounded text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+                              >
+                                <option value="">Fare class</option>
+                                {fareClasses.map((fc) => (
+                                  <option key={fc.id} value={fc.id}>{fc.code} — {fc.name}</option>
+                                ))}
+                              </select>
+                              <select
+                                value={fare.passenger_type}
+                                onChange={(e) => updateFare(i, { passenger_type: e.target.value })}
+                                className="col-span-2 py-2.5 px-2 bg-slate-50 border-none rounded text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+                              >
+                                {PASSENGER_TYPES.map((pt) => (
+                                  <option key={pt} value={pt}>{pt}</option>
+                                ))}
+                              </select>
+                              <input
+                                type="number" step="0.01" placeholder="Price"
+                                value={fare.price}
+                                onChange={(e) => updateFare(i, { price: e.target.value })}
+                                className="col-span-3 py-2.5 px-3 bg-slate-50 border-none rounded text-sm outline-none focus:ring-2 focus:ring-teal-500/20"
+                              />
+                              <input
+                                value={fare.currency}
+                                onChange={(e) => updateFare(i, { currency: e.target.value.toUpperCase() })}
+                                maxLength={3}
+                                className="col-span-2 py-2.5 px-2 bg-slate-50 border-none rounded text-sm outline-none focus:ring-2 focus:ring-teal-500/20 uppercase text-center"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setFares((rows) => rows.filter((_, idx) => idx !== i))}
+                                disabled={fares.length === 1}
+                                className="col-span-1 p-2 text-slate-400 hover:text-red-500 disabled:opacity-30 disabled:hover:text-slate-400"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                            {isDuplicate && (
+                              <p className="text-[11px] text-red-500 mt-1 ml-1">
+                                Duplicate: this fare class + passenger type is already set in another row.
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 

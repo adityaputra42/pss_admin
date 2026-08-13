@@ -1,6 +1,7 @@
 import { ArrowRight, Clock, PlaneTakeoff, Repeat } from 'lucide-react';
 
 import type { Airport, FareClass, Itinerary } from '../../types/api';
+import { PASSENGER_TYPES } from '../../types/api';
 
 interface ItineraryCardProps {
   itinerary: Itinerary;
@@ -102,11 +103,17 @@ const ItineraryCard = ({
             const fc = fareClassById?.get(fare.fare_class_id);
             const label = fc ? `${fc.code} — ${fc.name}` : `Fare class #${fare.fare_class_id}`;
             const selected = selectedFareClassId === fare.fare_class_id;
+            // Show only the passenger types this fare actually has a
+            // price for -- a fare with just an ADT price shouldn't
+            // imply CHD/INF are bookable on it too.
+            const priceLine = PASSENGER_TYPES.filter((pt) => fare.prices[pt] != null)
+              .map((pt) => `${pt} ${fare.currency} ${fare.prices[pt]}`)
+              .join(' · ');
             const content = (
               <>
                 <div className="font-bold">{label}</div>
                 <div className="text-xs opacity-80">
-                  {fare.currency} {fare.price} · {fare.available_seats} seats left
+                  {priceLine || 'No price set'} · {fare.available_seats} seats left
                 </div>
               </>
             );

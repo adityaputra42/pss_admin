@@ -184,6 +184,9 @@ const [passengers, setPassengers] = useState<PassengerState>({
         departureAirportId: depId,
         arrivalAirportId: arrId,
         date,
+        // total_pax is required server-side (400 without it) -- total
+        // headcount including infants, matching how the picker counts them.
+        totalPax: passengers.adults + passengers.children + passengers.infants,
         tripType,
         returnDate: tripType === 'round_trip' ? returnDate : undefined,
         maxStops,
