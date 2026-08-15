@@ -45,6 +45,13 @@ export const flightsApi = {
     await api.delete(`/flights/instances/${id}`);
   },
 
+  /**
+   * Materializes flight instances for a schedule's date range.
+   * `fares` is FLAT -- one row per (fare_class_id, passenger_type) pair,
+   * not nested. To sell a fare class to ADT+CHD+INF, include three rows
+   * sharing the same fare_class_id. Every row's price/currency is
+   * required server-side (http.fareRequest).
+   */
   async generateFlightsData(
     scheduleId: number,
     payload: {
@@ -91,6 +98,13 @@ export const flightsApi = {
     return response.data.data ?? [];
   },
 
+  /**
+   * Attaches one sellable fare_class_id to a flight, with a price for
+   * each passenger type it should be bookable by. `prices` needs at
+   * least one entry (http.addFlightFareRequest) -- CHD/INF can be added
+   * afterwards via setFarePrice, but ADT (or whichever types you want
+   * sellable immediately) must go in here.
+   */
   async addFare(
     flightId: number,
     payload: {
@@ -117,6 +131,12 @@ export const flightsApi = {
     await api.delete(`/flights/fares/${fareId}`);
   },
 
+  /**
+   * PUT /flights/fares/{fareId}/prices -- upsert: creates the price for
+   * this passenger_type if it doesn't exist on the fare yet, or
+   * corrects it if it does. Use this for both "add a price" and "edit
+   * a price" in the UI.
+   */
   async setFarePrice(
     fareId: number,
     payload: { passenger_type: PassengerType | string; price: string; currency?: string },
@@ -125,6 +145,11 @@ export const flightsApi = {
     return response.data.data;
   },
 
+  /**
+   * DELETE /flights/fares/prices/{priceId} -- removes one passenger
+   * type's price. That passenger type can no longer be booked on this
+   * fare; the fare bucket (seat inventory) itself is untouched.
+   */
   async deleteFarePrice(priceId: number): Promise<void> {
     await api.delete(`/flights/fares/prices/${priceId}`);
   },

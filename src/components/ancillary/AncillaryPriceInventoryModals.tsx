@@ -125,9 +125,11 @@ interface AncillaryInventoryModalProps {
 }
 
 /**
- * ⚠️ Opt-in scarcity: an ancillary with NO inventory row for a flight is
- * treated as unlimited by the purchase flow. Only use this for
- * genuinely limited stock (e.g. a fixed extra-baggage allotment).
+ * ⚠️ Whitelist: an ancillary with NO inventory row for a flight is now
+ * NOT purchasable on it (purchase.go rejects with 400 if flight_id is
+ * passed and no row exists) -- this used to mean unlimited, it doesn't
+ * anymore. Every ancillary a flight should sell needs a row here, even
+ * ones you don't want to cap the quantity of.
  */
 export const AncillaryInventoryModal: React.FC<AncillaryInventoryModalProps> = ({ isOpen, onClose, item, onSave }) => {
   const [flightId, setFlightId] = useState('');
@@ -173,7 +175,8 @@ export const AncillaryInventoryModal: React.FC<AncillaryInventoryModalProps> = (
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                   <div className="bg-amber-50/60 border border-amber-100 rounded p-3 text-[11px] text-amber-800">
-                    Only set this for genuinely limited stock. An ancillary with no inventory row for a flight is unlimited by default.
+                    Whitelist: an ancillary is only purchasable on a flight if it has a row here. There's no
+                    remove button once added -- set quantity to 0 to effectively stop it selling.
                   </div>
 
                   <div className="space-y-1.5">

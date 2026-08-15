@@ -12,6 +12,7 @@ import {
   Trash2,
   PlaneTakeoff,
   DollarSign,
+  Package,
 } from 'lucide-react';
 
 import { showConfirmAlert, showErrorAlert, showSuccessAlert } from '../../utils/alerts';
@@ -20,6 +21,7 @@ import { flightsApi, airportsApi, flightSchedulesApi, aircraftsApi, fareClassesA
 import FlightInstanceModal from '../../components/flight/FlightInstanceModal';
 import ItineraryCard from '../../components/flight/ItineraryCard';
 import FlightFareManagerModal from '../../components/flight/FlightFareManagerModal';
+import FlightAncillaryManagerModal from '../../components/ancillary/FlightAncillaryManagerModal';
 import GenerateFlightsModal from '../../components/flight/GenerateFlightsModal';
 
 import PassengerSelector, {
@@ -66,6 +68,8 @@ const [passengers, setPassengers] = useState<PassengerState>({
   const [editingInstance, setEditingInstance] = useState<Flight | null>(null);
   const [fareModalOpen, setFareModalOpen] = useState(false);
   const [fareModalFlight, setFareModalFlight] = useState<Flight | null>(null);
+  const [ancillaryModalOpen, setAncillaryModalOpen] = useState(false);
+  const [ancillaryModalFlight, setAncillaryModalFlight] = useState<Flight | null>(null);
   const [generateModalOpen, setGenerateModalOpen] = useState(false);
 
   useEffect(() => {
@@ -614,6 +618,13 @@ const [passengers, setPassengers] = useState<PassengerState>({
                               <DollarSign className="w-4 h-4" />
                             </button>
                             <button
+                              onClick={() => { setAncillaryModalFlight(flight); setAncillaryModalOpen(true); }}
+                              className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded transition-all"
+                              title="Manage Ancillaries"
+                            >
+                              <Package className="w-4 h-4" />
+                            </button>
+                            <button
                               onClick={() => { setEditingInstance(flight); setInstanceModalOpen(true); }}
                               className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded transition-all"
                               title="Edit"
@@ -658,6 +669,12 @@ const [passengers, setPassengers] = useState<PassengerState>({
         onClose={() => setFareModalOpen(false)}
         flight={fareModalFlight}
         fareClasses={fareClasses}
+      />
+
+      <FlightAncillaryManagerModal
+        isOpen={ancillaryModalOpen}
+        onClose={() => setAncillaryModalOpen(false)}
+        flight={ancillaryModalFlight}
       />
 
       <GenerateFlightsModal

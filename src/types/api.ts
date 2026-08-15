@@ -297,8 +297,10 @@ export interface Flight {
   id: number;
   schedule_id: number;
   aircraft_id: number;
+
   departure_time: string;
   arrival_time: string;
+
   status: string; // e.g. "SCHEDULED" | "DEPARTED" | "ARRIVED" | "CANCELLED" -- exact set not confirmed, don't hardcode a strict union
 }
 
@@ -318,6 +320,12 @@ export const PASSENGER_TYPE_LABELS: Record<PassengerType, string> = {
   INF: 'Infant',
 };
 
+/**
+ * One passenger-type price on a fare bucket. Managed independently of
+ * the fare itself: PUT /flights/fares/{fareId}/prices upserts (add or
+ * correct) a single passenger_type's price, DELETE
+ * /flights/fares/prices/{priceId} removes it.
+ */
 export interface FlightFarePrice {
   id: number;
   passenger_type: string; // ADT | CHD | INF
@@ -330,9 +338,11 @@ export interface FlightFare {
   flight_id: number;
   fare_class_id: number;
   available_seats: number;
+  /** At least one required server-side when the fare is first created (POST .../fares). */
   prices: FlightFarePrice[];
 }
 
+/** POST /flights/instances body. All fields required; times are RFC3339 (e.g. "2026-08-15T09:00:00+07:00"), status optional (defaults SCHEDULED server-side). */
 export interface FlightInput {
   schedule_id: number;
   aircraft_id: number;
@@ -341,6 +351,7 @@ export interface FlightInput {
   status?: string;
 }
 
+/** PUT /flights/instances/{id} body -- schedule_id is NOT editable (see UpdateFlight's sqlc comment: delete + regenerate instead if the schedule itself is wrong). */
 export type FlightUpdateInput = Partial<Omit<FlightInput, 'schedule_id'>>;
 
 export const FLIGHT_STATUSES = [
@@ -512,6 +523,8 @@ export interface CatalogItem {
   IsActive: boolean;
   CurrentPrice?: string | null;
   Currency?: string;
+  /** Only present from getFlightCatalog -- how many are left for that specific flight. Absent/null everywhere else. */
+  AvailableQuantity?: number | null;
 }
 
 export interface AncillaryPrice {

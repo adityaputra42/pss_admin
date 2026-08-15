@@ -123,8 +123,10 @@ export const ancillaryApi = {
 
   // ---------- Inventory ----------
 
-  /** Opt-in scarcity: an ancillary with no inventory row for a flight is
-   * treated as unlimited. Only set this for genuinely limited stock. */
+  /** Whitelist: an ancillary with NO inventory row for a flight is now
+   * NOT purchasable on it (see PurchaseHandler.Handle server-side) --
+   * this is the write side. Every ancillary a flight should sell needs
+   * a row here, even if you don't care about capping quantity. */
   async setInventory(
     id: number,
     payload: { flight_id: number; available_quantity: number },
@@ -133,10 +135,13 @@ export const ancillaryApi = {
     return response.data.data;
   },
 
+  async getFlightCatalog(flightId: number): Promise<CatalogItem[]> {
+    const response = await api.get<ApiResponse<CatalogItem[]>>(`/ancillaries/flight/${flightId}`);
+    return response.data.data ?? [];
+  },
+
   // ---------- Purchases ----------
 
-  /** Only lookup path that exists server-side -- there is no
-   * list-all-purchases endpoint. */
   async listPurchasesByPNR(pnrId: number): Promise<AncillaryPurchase[]> {
     const response = await api.get<ApiResponse<AncillaryPurchase[]>>(`/ancillaries/purchases/pnr/${pnrId}`);
     return response.data.data ?? [];
@@ -154,8 +159,6 @@ export const ancillaryApi = {
     return response.data.data;
   },
 
-  /** ACTIVE -> CANCELLED only. Does NOT restore flight-scoped inventory
-   * (schema gap -- see CancelHandler.Handle's doc comment server-side). */
   async cancelPurchase(id: number): Promise<AncillaryPurchase | null> {
     const response = await api.post<ApiResponse<AncillaryPurchase>>(`/ancillaries/purchases/${id}/cancel`);
     return response.data.data;
