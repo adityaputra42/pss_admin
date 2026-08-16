@@ -1,6 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Ticket } from 'lucide-react';
@@ -10,7 +10,7 @@ import type { FareClass, SeatClass } from '../../types/api';
 const schema = z.object({
   code: z.string().min(1, 'Code is required').max(30, 'Max 30 characters'),
   name: z.string().min(1, 'Name is required').max(100, 'Max 100 characters'),
-  seat_class_id: z.coerce.number({ required_error: 'Seat class is required' }).min(1, 'Seat class is required'),
+  seat_class_id: z.coerce.number({ error: 'Seat class is required' }).min(1, 'Seat class is required'),
   refundable: z.boolean(),
   rescheduleable: z.boolean(),
   baggage_kg: z.coerce.number().min(0, 'Must be 0 or more'),
@@ -50,7 +50,7 @@ const FareClassModal: React.FC<FareClassModalProps> = ({ isOpen, onClose, fareCl
     formState: { errors, isSubmitting },
     reset,
   } = useForm<FormInputs>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as Resolver<FormInputs>,
     defaultValues: {
       code: '',
       name: '',

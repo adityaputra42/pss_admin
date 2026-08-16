@@ -135,6 +135,9 @@ export const ancillaryApi = {
     return response.data.data;
   },
 
+  /** GET /ancillaries/flight/{flight_id} -- the read side of the
+   * whitelist: every ancillary actually offered on this flight, each
+   * with its available_quantity and current price. */
   async getFlightCatalog(flightId: number): Promise<CatalogItem[]> {
     const response = await api.get<ApiResponse<CatalogItem[]>>(`/ancillaries/flight/${flightId}`);
     return response.data.data ?? [];
@@ -142,6 +145,8 @@ export const ancillaryApi = {
 
   // ---------- Purchases ----------
 
+  /** Only lookup path that exists server-side -- there is no
+   * list-all-purchases endpoint. */
   async listPurchasesByPNR(pnrId: number): Promise<AncillaryPurchase[]> {
     const response = await api.get<ApiResponse<AncillaryPurchase[]>>(`/ancillaries/purchases/pnr/${pnrId}`);
     return response.data.data ?? [];
@@ -159,6 +164,8 @@ export const ancillaryApi = {
     return response.data.data;
   },
 
+  /** ACTIVE -> CANCELLED only. Does NOT restore flight-scoped inventory
+   * (schema gap -- see CancelHandler.Handle's doc comment server-side). */
   async cancelPurchase(id: number): Promise<AncillaryPurchase | null> {
     const response = await api.post<ApiResponse<AncillaryPurchase>>(`/ancillaries/purchases/${id}/cancel`);
     return response.data.data;

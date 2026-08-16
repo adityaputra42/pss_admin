@@ -1,6 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X } from 'lucide-react';
@@ -10,8 +10,8 @@ import { FLIGHT_STATUSES } from '../../types/api';
 
 const schema = z
   .object({
-    schedule_id: z.coerce.number({ required_error: 'Schedule is required' }).min(1, 'Schedule is required'),
-    aircraft_id: z.coerce.number({ required_error: 'Aircraft is required' }).min(1, 'Aircraft is required'),
+    schedule_id: z.coerce.number({ error: 'Schedule is required' }).min(1, 'Schedule is required'),
+    aircraft_id: z.coerce.number({ error: 'Aircraft is required' }).min(1, 'Aircraft is required'),
     departure_time: z.string().min(1, 'Departure time is required'),
     arrival_time: z.string().min(1, 'Arrival time is required'),
     status: z.string().min(1, 'Status is required'),
@@ -79,7 +79,8 @@ const FlightInstanceModal: React.FC<FlightInstanceModalProps> = ({
     formState: { errors, isSubmitting },
     reset,
   } = useForm<FormInputs>({
-    resolver: zodResolver(schema),
+   
+    resolver: zodResolver(schema) as Resolver<FormInputs>,
     defaultValues: {
       schedule_id: 0,
       aircraft_id: 0,

@@ -1,6 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { X, Plane, MapPin, Clock } from 'lucide-react';
@@ -28,8 +28,8 @@ const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
 const schema = z
   .object({
     flight_number: z.string().min(1, 'Flight number is required').max(20, 'Max 20 characters'),
-    departure_airport_id: z.coerce.number({ required_error: 'Departure airport is required' }).min(1, 'Departure airport is required'),
-    arrival_airport_id: z.coerce.number({ required_error: 'Arrival airport is required' }).min(1, 'Arrival airport is required'),
+    departure_airport_id: z.coerce.number({ error: 'Departure airport is required' }).min(1, 'Departure airport is required'),
+    arrival_airport_id: z.coerce.number({ error: 'Arrival airport is required' }).min(1, 'Arrival airport is required'),
     departure_time: z.string().regex(timeRegex, 'Use HH:MM (24h)'),
     arrival_time: z.string().regex(timeRegex, 'Use HH:MM (24h)'),
     operating_days: z.number().min(1, 'Select at least one operating day'),
@@ -79,7 +79,7 @@ const FlightScheduleFormModal: React.FC<FlightScheduleFormModalProps> = ({
     formState: { errors, isSubmitting },
     reset,
   } = useForm<FormInputs>({
-    resolver: zodResolver(schema),
+   resolver: zodResolver(schema) as Resolver<FormInputs>,
     defaultValues: {
       flight_number: '',
       departure_airport_id: 0,
