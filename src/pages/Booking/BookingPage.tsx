@@ -1,4 +1,4 @@
-import {  useState } from 'react';
+import {  useEffect, useState } from 'react';
 
 import {
 
@@ -39,18 +39,19 @@ const BookingPage = () => {
   const [detail, setDetail] = useState<PNRDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
-  const loadPnrs = async () => {
-    setPnrsLoading(true);
-    try {
-      const res = await bookingsApi.getBookings({ page: 1, limit: 100, status: statusFilter || undefined });
-      setPnrs(res.items ?? []);
-      setPnrsTotal(res.total ?? 0);
-    } catch (err: any) {
-      showErrorAlert(err?.response?.data?.message || 'Failed to load bookings');
-    } finally {
-      setPnrsLoading(false);
-    }
-  };
+
+const loadPnrs = async () => {
+  setPnrsLoading(true);
+  try {
+    const res = await bookingsApi.getBookings({ page: 1, limit: 100, status: statusFilter || undefined });
+    setPnrs(res.items ?? []);
+    setPnrsTotal(res.total ?? 0);
+  } catch (err: any) {
+    showErrorAlert(err?.response?.data?.message || 'Failed to load bookings');
+  } finally {
+    setPnrsLoading(false);
+  }
+};
 
   const filteredPnrs = pnrs.filter((p) =>
     p.booking_code.toLowerCase().includes(search.toLowerCase()),
@@ -87,6 +88,11 @@ const BookingPage = () => {
     }
   };
 
+
+useEffect(() => {
+  loadPnrs();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [statusFilter]);
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
