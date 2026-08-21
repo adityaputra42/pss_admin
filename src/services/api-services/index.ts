@@ -19,4 +19,5 @@ export { authApi } from './auth';
 export { bookingsApi } from './booking';
 export { boardingPassApi } from './boardingPass';
 export { checkinsApi } from './checkIn';
+export { walletApi } from './wallet';
 

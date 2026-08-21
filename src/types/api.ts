@@ -491,6 +491,60 @@ export interface PaymentListResult {
 }
 
 // ======================================================
+// WALLET (staff's own wallet -- login required, always the caller's
+// own; there is no admin endpoint to view someone else's balance)
+// ======================================================
+
+export interface WalletBalance {
+  balance: string;
+  currency: string;
+}
+
+export interface WalletTransaction {
+  id: number;
+  type: 'TOPUP' | 'PAYMENT_DEBIT' | 'REFUND_CREDIT' | 'ADJUSTMENT';
+  amount: string;
+  balance_after: string;
+  reference_type?: string;
+  reference_id?: string;
+  description?: string;
+  created_at: string;
+}
+
+/** GET /wallet/transactions -- own lowercase items/total/page/limit shape, NOT the shared {Items, Total} ListResponse<T> convention used elsewhere in this file. */
+export interface WalletTransactionsResult {
+  items: WalletTransaction[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface TopupInput {
+  amount: number;
+  channel?: string;
+}
+
+export interface TopupResult {
+  topup_code: string;
+  virtual_account_no: string;
+  channel: string;
+  expired_at: string;
+  amount: string;
+  currency: string;
+}
+
+export interface TopupStatus {
+  topup_code: string;
+  status: string; // PENDING, PAID, FAILED, EXPIRED
+  amount: string;
+  currency: string;
+  virtual_account_no?: string;
+  channel?: string;
+  expired_at?: string;
+  paid_at?: string;
+}
+
+// ======================================================
 // ANCILLARY
 // ======================================================
 
