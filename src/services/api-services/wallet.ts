@@ -30,4 +30,9 @@ export const walletApi = {
     const response = await api.get<ApiResponse<TopupStatus>>(`/wallet/topup/${code}`);
     return response.data.data;
   },
+
+  async getBalanceForUser(userId: number): Promise<WalletBalance | null> {
+    const response = await api.get<ApiResponse<WalletBalance>>(`/wallet/users/${userId}/balance`);
+    return response.data.data;
+  },
 };

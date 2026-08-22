@@ -41,6 +41,7 @@ const ProfilePage = () => {
       showErrorAlert(error.response?.data?.message || 'Failed to update profile.');
     }
   };
+
   const [balance, setBalance] = useState<{ balance: string; currency: string } | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(true);
   const [recentTx, setRecentTx] = useState<WalletTransaction[]>([]);

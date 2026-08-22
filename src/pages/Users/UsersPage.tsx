@@ -6,9 +6,15 @@ import {
   showErrorAlert,
   showConfirmAlert,
 } from '../../utils/alerts';
-import { Plus, Power, PowerOff, Lock, Search, Edit3, Users as UsersIcon } from 'lucide-react';
-import { usersApi } from '../../services/api-services';
+import { Plus, Power, PowerOff, Lock, Search, Edit3, Users as UsersIcon, Wallet, Loader2, X } from 'lucide-react';
+import { usersApi, walletApi } from '../../services/api-services';
 import type { User } from '../../types/api';
+
+const formatMoney = (amount: string, currency = 'IDR') => {
+  const n = Number(amount);
+  if (Number.isNaN(n)) return `${currency} —`;
+  return `${currency} ${n.toLocaleString('id-ID')}`;
+};
 
 const statusStyle: Record<string, string> = {
   ACTIVE: 'bg-emerald-50 text-emerald-600 ring-emerald-100',
@@ -16,12 +22,6 @@ const statusStyle: Record<string, string> = {
   INACTIVE: 'bg-slate-100 text-slate-500 ring-slate-200',
 };
 
-/**
- * Full directory view against GET /auth/users + GET /auth/users/{id}
- * (added alongside ListUsersHandler/GetUserHandler -- previously there
- * was no way to browse users at all, only blind create/update/status by
- * a manually-typed id, see git history on this file).
- */
 const UsersPage = () => {
   const { isSubmitting, createUser, updateUser, setUserStatus } = useUsers();
 
@@ -32,6 +32,25 @@ const UsersPage = () => {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+
+  const [balanceUser, setBalanceUser] = useState<User | null>(null);
+  const [balance, setBalance] = useState<{ balance: string; currency: string } | null>(null);
+  const [balanceLoading, setBalanceLoading] = useState(false);
+
+  const viewBalance = async (user: User) => {
+    setBalanceUser(user);
+    setBalance(null);
+    setBalanceLoading(true);
+    try {
+      const result = await walletApi.getBalanceForUser(user.id);
+      setBalance(result);
+    } catch (err: any) {
+      showErrorAlert(err.response?.data?.message || 'Failed to load balance.');
+      setBalanceUser(null);
+    } finally {
+      setBalanceLoading(false);
+    }
+  };
 
   const loadUsers = async () => {
     setLoading(true);
@@ -160,6 +179,13 @@ const UsersPage = () => {
                   <td className="px-6 py-4 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-1">
                       <button
+                        onClick={() => viewBalance(user)}
+                        className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded transition-all"
+                        title="View wallet balance"
+                      >
+                        <Wallet className="w-4 h-4" />
+                      </button>
+                      <button
                         onClick={() => { setEditingUser(user); setIsFormOpen(true); }}
                         className="p-2 text-slate-400 hover:text-primary hover:bg-teal-50 rounded transition-all"
                         title="Edit profile"
@@ -209,6 +235,37 @@ const UsersPage = () => {
           </div>
         )}
       </div>
+
+      {balanceUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setBalanceUser(null)} />
+          <div className="relative w-full max-w-sm rounded-md bg-white shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Wallet className="w-4 h-4 text-primary" /> Wallet Balance
+              </h2>
+              <button onClick={() => setBalanceUser(null)} className="p-2 text-slate-400 hover:text-slate-900 hover:bg-white rounded transition-all">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="text-sm text-slate-500 mb-3">{balanceUser.full_name} &middot; {balanceUser.username}</div>
+              {balanceLoading ? (
+                <div className="py-6 flex justify-center">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                </div>
+              ) : (
+                <div className="text-2xl font-bold text-slate-900">
+                  {balance ? formatMoney(balance.balance, balance.currency) : '—'}
+                </div>
+              )}
+              <p className="text-xs text-slate-400 mt-3">
+                A user who has never topped up or paid with their balance simply shows Rp 0 -- a wallet is only created in the database the first time it's actually used.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <UserFormModal
         isOpen={isFormOpen}
