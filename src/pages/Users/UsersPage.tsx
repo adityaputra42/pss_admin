@@ -9,6 +9,9 @@ import {
 import { Plus, Power, PowerOff, Lock, Search, Edit3, Users as UsersIcon, Wallet, Loader2, X } from 'lucide-react';
 import { usersApi, walletApi } from '../../services/api-services';
 import type { User } from '../../types/api';
+import Pagination from '../../components/common/Pagination';
+
+const PAGE_LIMIT = 10;
 
 const formatMoney = (amount: string, currency = 'IDR') => {
   const n = Number(amount);
@@ -29,6 +32,7 @@ const UsersPage = () => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -52,12 +56,13 @@ const UsersPage = () => {
     }
   };
 
-  const loadUsers = async () => {
+  const loadUsers = async (page: number = currentPage) => {
     setLoading(true);
     try {
-      const res = await usersApi.getUsers(1, 100);
+      const res = await usersApi.getUsers(page, PAGE_LIMIT);
       setUsers(res.items ?? []);
       setTotal(res.total ?? 0);
+      setCurrentPage(res.page ?? page);
     } catch (err: any) {
       showErrorAlert(err?.response?.data?.message || 'Failed to load users');
     } finally {
@@ -66,8 +71,11 @@ const UsersPage = () => {
   };
 
   useEffect(() => {
-    loadUsers();
+    loadUsers(1);
+   
   }, []);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));
 
   const filtered = users.filter((u) => {
     const keyword = search.toLowerCase();
@@ -77,6 +85,11 @@ const UsersPage = () => {
       u.full_name?.toLowerCase().includes(keyword)
     );
   });
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    loadUsers(page);
+  };
 
   const handleSave = async (data: Record<string, unknown>, userId: number | null) => {
     try {
@@ -88,7 +101,7 @@ const UsersPage = () => {
         showSuccessAlert('User created successfully!');
       }
       setIsFormOpen(false);
-      loadUsers();
+      loadUsers(currentPage);
     } catch (err: any) {
       showErrorAlert(err.response?.data?.message || err.message || 'Failed to save user.');
     }
@@ -104,7 +117,7 @@ const UsersPage = () => {
     try {
       await setUserStatus(String(user.id), status);
       showSuccessAlert(`User status set to ${status}.`);
-      loadUsers();
+      loadUsers(currentPage);
     } catch (err: any) {
       showErrorAlert(err.response?.data?.message || err.message || 'Failed to change status.');
     }
@@ -229,11 +242,12 @@ const UsersPage = () => {
             </tbody>
           </table>
         )}
-        {total > users.length && (
-          <div className="px-6 py-3 text-xs text-slate-400 border-t border-slate-50">
-            Showing {users.length} of {total} -- increase the page limit in getUsers() to see more.
-          </div>
-        )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          disabled={loading}
+        />
       </div>
 
       {balanceUser && (

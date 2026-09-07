@@ -14,18 +14,13 @@ import {
 import { showErrorAlert } from '../../utils/alerts';
 import ScaleIn from '../../components/animations/ScaleIn';
 import DetailTable from '../../components/common/DetailTable';
+import Pagination from '../../components/common/Pagination';
 
 import type { Payment } from '../../types/api';
 import { paymentsApi } from '../../services/api-services';
 
-/**
- * GET /payments (admin, list across all PNRs) was added alongside
- * GetPaymentByID/GetPaymentByPNR -- "Browse" below is the new list view;
- * "Lookup" is the original by-id/by-pnr tool, unchanged. There is still
- * NO refund endpoint of any kind (DOKU's Virtual Account product this
- * integrates with has no refund flow) -- don't add a refund button
- * against this API.
- */
+const PAGE_LIMIT = 10;
+
 const statusStyle: Record<string, { icon: React.ReactNode; className: string }> = {
   PAID: { icon: <CheckCircle2 className="w-4 h-4" />, className: 'bg-emerald-50 text-emerald-600 ring-emerald-100' },
   PENDING: { icon: <Clock3 className="w-4 h-4" />, className: 'bg-amber-50 text-amber-600 ring-amber-100' },
@@ -44,13 +39,15 @@ const PaymentsPage = () => {
   const [total, setTotal] = useState(0);
   const [listLoading, setListLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const loadPayments = async () => {
+  const loadPayments = async (page: number) => {
     setListLoading(true);
     try {
-      const res = await paymentsApi.getPayments({ page: 1, limit: 100, status: statusFilter || undefined });
+      const res = await paymentsApi.getPayments({ page, limit: PAGE_LIMIT, status: statusFilter || undefined });
       setPayments(res.items ?? []);
       setTotal(res.total ?? 0);
+      setCurrentPage(res.page ?? page);
     } catch (err: any) {
       showErrorAlert(err?.response?.data?.message || 'Failed to load payments');
     } finally {
@@ -60,9 +57,16 @@ const PaymentsPage = () => {
 
   useEffect(() => {
     if (tab !== 'browse') return;
-    loadPayments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    loadPayments(1);
   }, [tab, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_LIMIT));
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    loadPayments(page);
+  };
 
   // ---- Lookup (by id / by pnr) ----
   const [mode, setMode] = useState<'id' | 'pnr'>('pnr');
@@ -190,11 +194,12 @@ const PaymentsPage = () => {
                 </tbody>
               </table>
             )}
-            {total > payments.length && (
-              <div className="px-6 py-3 text-xs text-slate-400 border-t border-slate-50">
-                Showing {payments.length} of {total} -- increase the page limit in getPayments() to see more.
-              </div>
-            )}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              disabled={listLoading}
+            />
           </div>
         </>
       )}

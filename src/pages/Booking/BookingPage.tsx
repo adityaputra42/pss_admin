@@ -18,8 +18,11 @@ import {
 
 import { bookingsApi } from '../../services/api-services/booking';
 import DetailTable from '../../components/common/DetailTable';
+import Pagination from '../../components/common/Pagination';
 
 import type { PNRDetail, PNRSummary} from '../../types/api';
+
+const PAGE_LIMIT = 10;
 
 const pnrStatusStyle: Record<string, string> = {
   HOLD: 'bg-amber-50 text-amber-600 ring-amber-100',
@@ -35,17 +38,19 @@ const BookingPage = () => {
   const [pnrsLoading, setPnrsLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [detailOpen, setDetailOpen] = useState(false);
   const [detail, setDetail] = useState<PNRDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
 
-const loadPnrs = async () => {
+const loadPnrs = async (page: number) => {
   setPnrsLoading(true);
   try {
-    const res = await bookingsApi.getBookings({ page: 1, limit: 100, status: statusFilter || undefined });
+    const res = await bookingsApi.getBookings({ page, limit: PAGE_LIMIT, status: statusFilter || undefined });
     setPnrs(res.items ?? []);
     setPnrsTotal(res.total ?? 0);
+    setCurrentPage(res.page ?? page);
   } catch (err: any) {
     showErrorAlert(err?.response?.data?.message || 'Failed to load bookings');
   } finally {
@@ -53,6 +58,14 @@ const loadPnrs = async () => {
   }
 };
 
+  const totalPages = Math.max(1, Math.ceil(pnrsTotal / PAGE_LIMIT));
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    loadPnrs(page);
+  };
+
+ 
   const filteredPnrs = pnrs.filter((p) =>
     p.booking_code.toLowerCase().includes(search.toLowerCase()),
   );
@@ -81,7 +94,7 @@ const loadPnrs = async () => {
     try {
       await bookingsApi.cancelBooking(pnr.id);
       showSuccessAlert('PNR cancelled');
-      loadPnrs();
+      loadPnrs(currentPage);
       if (detail && detail.ID === pnr.id) setDetailOpen(false);
     } catch (err: any) {
       showErrorAlert(err?.response?.data?.message || 'Failed to cancel PNR -- it may already be paid.');
@@ -90,7 +103,9 @@ const loadPnrs = async () => {
 
 
 useEffect(() => {
-  loadPnrs();
+  // statusFilter changed -- restart at page 1 so we don't strand the
+  // user on a page number the new filtered result set doesn't have.
+  loadPnrs(1);
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [statusFilter]);
 
@@ -180,11 +195,12 @@ useEffect(() => {
                 </tbody>
               </table>
             )}
-            {pnrsTotal > pnrs.length && (
-              <div className="px-6 py-3 text-xs text-slate-400 border-t border-slate-50">
-                Showing {pnrs.length} of {pnrsTotal}.
-              </div>
-            )}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              disabled={pnrsLoading}
+            />
           </div>
         </div>
       {/* )} */}

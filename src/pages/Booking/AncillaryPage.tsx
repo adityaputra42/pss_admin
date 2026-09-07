@@ -23,8 +23,11 @@ import ScaleIn from '../../components/animations/ScaleIn';
 import AncillaryCategoryModal from '../../components/ancillary/AncillaryCategoryModal';
 import AncillaryItemModal from '../../components/ancillary/AncillaryItemModal';
 import { AncillaryInventoryModal, AncillaryPriceModal } from '../../components/ancillary/AncillaryPriceInventoryModals';
+import Pagination from '../../components/common/Pagination';
 
 type Tab = 'categories' | 'catalog' | 'purchases';
+
+const PAGE_LIMIT = 10;
 
 const purchaseStatusStyle: Record<string, { icon: React.ReactNode; className: string }> = {
   ACTIVE: { icon: <CheckCircle2 className="w-3.5 h-3.5" />, className: 'bg-emerald-50 text-emerald-600 ring-emerald-100' },
@@ -39,11 +42,12 @@ const AncillaryPage = () => {
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<AncillaryCategory | null>(null);
+  const [categoriesPage, setCategoriesPage] = useState(1);
 
   const loadCategories = async () => {
     setCategoriesLoading(true);
     try {
-      const res = await ancillaryApi.listCategories(1, 100);
+      const res = await ancillaryApi.listCategories(1, 200);
       setCategories(res.items ?? []);
     } catch (err: any) {
       showErrorAlert(err?.response?.data?.message || 'Failed to load categories');
@@ -55,6 +59,24 @@ const AncillaryPage = () => {
   useEffect(() => {
     loadCategories();
   }, []);
+
+  const categoriesTotalPages = Math.max(1, Math.ceil(categories.length / PAGE_LIMIT));
+
+  const paginatedCategories = categories.slice(
+    (categoriesPage - 1) * PAGE_LIMIT,
+    categoriesPage * PAGE_LIMIT,
+  );
+
+  useEffect(() => {
+    if (categoriesPage > categoriesTotalPages) {
+      setCategoriesPage(categoriesTotalPages);
+    }
+  }, [categoriesPage, categoriesTotalPages]);
+
+  const handleCategoriesPageChange = (page: number) => {
+    if (page < 1 || page > categoriesTotalPages) return;
+    setCategoriesPage(page);
+  };
 
   const handleSaveCategory = async (data: { code?: string; name: string; description?: string }, id: number | null) => {
     try {
@@ -86,6 +108,7 @@ const AncillaryPage = () => {
   const [catalog, setCatalog] = useState<CatalogItem[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogTotal, setCatalogTotal] = useState(0);
+  const [catalogPage, setCatalogPage] = useState(1);
   const [categoryFilter, setCategoryFilter] = useState<number | ''>('');
   const [itemModalOpen, setItemModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<CatalogItem | null>(null);
@@ -93,16 +116,17 @@ const AncillaryPage = () => {
   const [inventoryModalOpen, setInventoryModalOpen] = useState(false);
   const [targetItem, setTargetItem] = useState<CatalogItem | null>(null);
 
-  const loadCatalog = async () => {
+  const loadCatalog = async (page: number) => {
     setCatalogLoading(true);
     try {
       const res = await ancillaryApi.listCatalog({
         category_id: categoryFilter || undefined,
-        page: 1,
-        limit: 100,
+        page,
+        limit: PAGE_LIMIT,
       });
       setCatalog(res.items ?? []);
       setCatalogTotal(res.total ?? 0);
+      setCatalogPage(res.page ?? page);
     } catch (err: any) {
       showErrorAlert(err?.response?.data?.message || 'Failed to load catalog');
     } finally {
@@ -111,9 +135,18 @@ const AncillaryPage = () => {
   };
 
   useEffect(() => {
-    if (tab === 'catalog') loadCatalog();
+    // Category filter changed (or tab just switched to catalog) --
+    // restart at page 1, same reasoning as Payments/Bookings above.
+    if (tab === 'catalog') loadCatalog(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, categoryFilter]);
+
+  const catalogTotalPages = Math.max(1, Math.ceil(catalogTotal / PAGE_LIMIT));
+
+  const handleCatalogPageChange = (page: number) => {
+    if (page < 1 || page > catalogTotalPages || page === catalogPage) return;
+    loadCatalog(page);
+  };
 
   const handleSaveItem = async (
     data: { category_id: number; code?: string; name: string; description?: string; is_active: boolean },
@@ -127,7 +160,7 @@ const AncillaryPage = () => {
       }
       showSuccessAlert(id ? 'Ancillary updated' : 'Ancillary created');
       setItemModalOpen(false);
-      loadCatalog();
+      loadCatalog(catalogPage);
     } catch (err: any) {
       showErrorAlert(err?.response?.data?.message || 'Failed to save ancillary');
     }
@@ -139,7 +172,7 @@ const AncillaryPage = () => {
     try {
       await ancillaryApi.deleteAncillary(item.ID);
       showSuccessAlert('Ancillary deleted');
-      loadCatalog();
+      loadCatalog(catalogPage);
     } catch (err: any) {
       showErrorAlert(err?.response?.data?.message || 'Failed to delete ancillary');
     }
@@ -151,7 +184,7 @@ const AncillaryPage = () => {
       await ancillaryApi.setPrice(targetItem.ID, payload);
       showSuccessAlert('Price updated');
       setPriceModalOpen(false);
-      loadCatalog();
+      loadCatalog(catalogPage);
     } catch (err: any) {
       showErrorAlert(err?.response?.data?.message || 'Failed to set price');
     }
@@ -265,7 +298,7 @@ const AncillaryPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {categories.map((c) => (
+                  {paginatedCategories.map((c) => (
                     <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4 font-bold text-slate-900">{c.code}</td>
                       <td className="px-6 py-4 font-medium text-slate-700">{c.name}</td>
@@ -291,6 +324,12 @@ const AncillaryPage = () => {
                 </tbody>
               </table>
             )}
+            <Pagination
+              currentPage={categoriesPage}
+              totalPages={categoriesTotalPages}
+              onPageChange={handleCategoriesPageChange}
+              disabled={categoriesLoading}
+            />
           </div>
         </ScaleIn>
       )}
@@ -417,6 +456,12 @@ const AncillaryPage = () => {
                 </tbody>
               </table>
             )}
+            <Pagination
+              currentPage={catalogPage}
+              totalPages={catalogTotalPages}
+              onPageChange={handleCatalogPageChange}
+              disabled={catalogLoading}
+            />
           </div>
         </ScaleIn>
       )}
